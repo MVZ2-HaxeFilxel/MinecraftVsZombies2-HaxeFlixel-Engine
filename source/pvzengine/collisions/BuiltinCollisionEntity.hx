@@ -185,6 +185,7 @@ class BuiltinCollisionEntity
 }
 
 // [Serializable]
+@:rtti
 class SerializableBuiltinCollisionSystemEntity implements ISerializableCollisionEntity
 {
     public function new()

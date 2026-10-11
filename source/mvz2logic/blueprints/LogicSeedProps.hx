@@ -11,9 +11,9 @@ import pvzengine.seedpacks.SeedPack;
 @:propertyRegistryRegion(PropertyRegions.seed)
 class LogicSeedProps
 {
-	static function Get<T>(name:String):PropertyMeta<T>
+	static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
 	{
-		return new PropertyMeta<T>(name);
+		return new PropertyMeta<T>(name, defaultValue);
 	}
 
 	//region 图标
@@ -68,7 +68,7 @@ class LogicSeedProps
 	//endregion
 
 	//region 实体变种
-	public static var VARIANT:PropertyMeta<Int> = Get("variant");
+	public static var VARIANT:PropertyMeta<Int> = Get("variant", 0);
 	public static function GetVariant(seed:SeedDefinition):Int
 	{
 		return seed.GetProperty(VARIANT);
@@ -85,7 +85,7 @@ class LogicSeedProps
 	//endregion
 
 	//region 升级器械蓝图
-	public static var UPGRADE_BLUEPRINT:PropertyMeta<Bool> = Get("upgradeBlueprint");
+	public static var UPGRADE_BLUEPRINT:PropertyMeta<Bool> = Get("upgradeBlueprint", false);
 	// TODO-PORT: C# 重载 IsUpgradeBlueprint(this SeedPack)，Haxe 不支持重载，重命名为 IsUpgradeBlueprintOfPack
 	public static function IsUpgradeBlueprintOfPack(seed:SeedPack):Bool
 	{
@@ -98,7 +98,7 @@ class LogicSeedProps
 	//endregion
 
 	//region 蓝图类型
-	public static var SEED_TYPE:PropertyMeta<Int> = Get("seedType");
+	public static var SEED_TYPE:PropertyMeta<Int> = Get("seedType", 0);
 	public static function GetSeedType(definition:SeedDefinition):Int
 	{
 		return definition.GetProperty(SEED_TYPE);
@@ -137,7 +137,7 @@ class LogicSeedProps
 	//endregion
 
 	//region 可触发
-	public static var TRIGGER_ACTIVE:PropertyMeta<Bool> = Get("triggerActive");
+	public static var TRIGGER_ACTIVE:PropertyMeta<Bool> = Get("triggerActive", false);
 	public static function IsTriggerActive(definition:SeedDefinition):Bool
 	{
 		return definition.GetProperty(TRIGGER_ACTIVE);
@@ -150,7 +150,7 @@ class LogicSeedProps
 	//endregion
 
 	//region 可立即触发
-	public static var CAN_INSTANT_TRIGGER:PropertyMeta<Bool> = Get("canInstantTrigger");
+	public static var CAN_INSTANT_TRIGGER:PropertyMeta<Bool> = Get("canInstantTrigger", false);
 	public static function CanInstantTrigger(definition:SeedDefinition):Bool
 	{
 		return definition.GetProperty(CAN_INSTANT_TRIGGER);
@@ -158,7 +158,7 @@ class LogicSeedProps
 	//endregion
 
 	//region 可立即激发
-	public static var CAN_INSTANT_EVOKE:PropertyMeta<Bool> = Get("canInstantEvoke");
+	public static var CAN_INSTANT_EVOKE:PropertyMeta<Bool> = Get("canInstantEvoke", false);
 	public static function CanInstantEvoke(definition:SeedDefinition):Bool
 	{
 		return definition.GetProperty(CAN_INSTANT_EVOKE);
@@ -166,7 +166,7 @@ class LogicSeedProps
 	//endregion
 
 	//region 闪烁
-	public static var TWINKLING:PropertyMeta<Bool> = Get("twinkling");
+	public static var TWINKLING:PropertyMeta<Bool> = Get("twinkling", false);
 	public static function IsTwinkling(seed:SeedPack):Bool
 	{
 		return seed.GetProperty(TWINKLING);
@@ -178,7 +178,7 @@ class LogicSeedProps
 	//endregion
 
 	//region 命令方块
-	public static var COMMAND_BLOCK:PropertyMeta<Bool> = Get("command_block");
+	public static var COMMAND_BLOCK:PropertyMeta<Bool> = Get("command_block", false);
 	// TODO-PORT: C# 方法名为 IsCommandBlock(this SeedPack)，与 SeedPack 引擎方法同名，为便于静态调用加 OfPack 后缀
 	public static function IsCommandBlockOfPack(seed:SeedPack):Bool
 	{

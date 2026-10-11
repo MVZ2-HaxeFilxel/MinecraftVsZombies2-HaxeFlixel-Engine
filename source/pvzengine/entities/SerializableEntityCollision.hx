@@ -8,6 +8,7 @@ package pvzengine.entities;
 import unity.Vector3;
 
 // [Serializable]
+@:rtti
 class SerializableEntityCollision
 {
     // PORT-NOTE: C# 为字段声明 + 对象初始化器；这里与工程内其它 Serializable* 类一致，

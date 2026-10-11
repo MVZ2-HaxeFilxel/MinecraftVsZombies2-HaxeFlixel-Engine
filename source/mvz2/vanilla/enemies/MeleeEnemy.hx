@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Enemies/Common/MeleeEnemy.cs
 package mvz2.vanilla.enemies;
 
+import unity.UnityObject;
 import mvz2.gamecontent.damages.VanillaDamageEffects;
 import mvz2.vanilla.callbacks.VanillaLevelCallbacks;
 import mvz2.vanilla.callbacks.VanillaLevelCallbacks.EnemyMeleeAttackParams;
@@ -62,7 +63,7 @@ class MeleeEnemy extends StateEnemy
             return;
         var target = other;
         var protector = target.GetProtector();
-        if (protector != null && protector.Exists() && !protector.IsFriendly(enemy))
+        if (protector != null && unity.UnityObject.exists(protector) && !protector.IsFriendly(enemy))
         {
             target = protector;
         }
@@ -73,7 +74,7 @@ class MeleeEnemy extends StateEnemy
     }
     function ValidateMeleeTarget(enemy:Entity, target:Null<Entity>):Bool
     {
-        if (target == null || !target.Exists() || target.IsDead)
+        if (target == null || !unity.UnityObject.exists(target) || target.IsDead)
             return false;
         if (!enemy.IsHostile(target))
             return false;
@@ -86,7 +87,7 @@ class MeleeEnemy extends StateEnemy
             if (target.IsFloor())
                 return false;
             var protector = target.GetProtector();
-            if (protector != null && protector.Exists() && !protector.IsFriendly(enemy))
+            if (protector != null && unity.UnityObject.exists(protector) && !protector.IsFriendly(enemy))
                 return false;
         }
         return true;

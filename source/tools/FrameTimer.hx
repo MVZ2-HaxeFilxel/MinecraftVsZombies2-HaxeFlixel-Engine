@@ -7,6 +7,7 @@ import unity.Mathf;
 /**
  * 帧计时器：Frame 表示「剩余帧数」，Expired 为 Frame <= 0。
  */
+@:rtti
 class FrameTimer extends Timer
 {
 	// C#: public FrameTimer() : this(0)

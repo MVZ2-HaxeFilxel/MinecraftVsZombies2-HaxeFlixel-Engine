@@ -819,7 +819,7 @@ class SaveManager extends unity.MonoBehaviour implements IGlobalSaveData {
         if (entry == null)
             return null;
         var json = ZipArchiveHelper.ReadString(entry, Encoding.UTF8);
-        var seri = SerializeHelper.FromBson(json);
+        var seri = mvz2logic.serialization.SerializeMacro.FromBson(json);
         var result = UserDataPackMetadata.FromSerializable(seri);
         archive.Dispose();
         stream.Dispose();

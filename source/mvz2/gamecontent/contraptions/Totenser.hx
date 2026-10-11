@@ -15,6 +15,7 @@ import pvzengine.EntityID;
 import pvzengine.NamespaceID;
 import pvzengine.entities.Entity;
 import unity.Vector3;
+import unity.UnityObject;
 using mvz2.vanilla.entities.VanillaEntityExt;
 using mvz2.vanilla.entities.VanillaEntityProps;
 using mvz2.vanilla.projectiles.VanillaProjectileExt;
@@ -78,7 +79,7 @@ class Totenser extends DispenserFamily
         {
             var fireBreath = GetFireBreath(entity);
             var position = entity.Position + Vector3.up * 5;
-            if (fireBreath == null || !fireBreath.Exists())
+            if (fireBreath == null || !unity.UnityObject.exists(fireBreath))
             {
                 // C#: entity.Level.Spawn(...)?.Let(e => { e.SetParent(entity); SetFireBreath(entity, e); })
                 fireBreath = entity.Level.Spawn(VanillaEffectID.fireBreath, position, entity);

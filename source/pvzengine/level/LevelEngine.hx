@@ -84,6 +84,7 @@ import unity.Debug;
 import unity.Mathf;
 import unity.Vector2Int;
 import unity.Vector3;
+import unity.UnityObject;
 using pvzengine.ContentProviderHelper;
 
 @:using(pvzengine.buffs.BuffTargetExt)
@@ -433,7 +434,7 @@ class LevelEngine implements IBuffTarget implements IModifierProvider
 	}
 	private function UpdateDelayedEnergyEntities():Void
 	{
-		var entities = [for (e in delayedEnergyEntities.keys()) if (!e.Exists()) e];
+		var entities = [for (e in delayedEnergyEntities.keys()) if (!unity.UnityObject.exists(e)) e];
 		for (entity in entities)
 		{
 			delayedEnergyEntities.remove(entity);

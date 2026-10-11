@@ -10,6 +10,7 @@ import pvzengine.NamespaceID;
 import pvzengine.entities.Entity;
 import pvzengine.entities.EntityID;
 import unity.Vector3;
+import unity.UnityObject;
 
 // PORT-NOTE: 原文件为 C# 的静态扩展类（MVZ2.Vanilla.Effects.FragmentExt），
 // Haxe 侧保留为普通静态类，调用处按 PORTING.md 改为静态调用（FragmentExt.X(entity, ...)）。
@@ -59,7 +60,7 @@ class FragmentExt
     {
         var fragmentRef = GetFragment(entity);
         var fragment = fragmentRef != null ? fragmentRef.GetEntity(entity.Level) : null;
-        if (fragment == null || !fragment.Exists())
+        if (fragment == null || !unity.UnityObject.exists(fragment))
         {
             var created = CreateFragment(entity);
             // PORT-NOTE: 原 C# 在 `?.Let` 闭包中引用尚未赋值的局部变量 fragment，
@@ -137,7 +138,7 @@ class FragmentExt
     {
         var reference = GetHealParticles(entity);
         var particles = reference != null ? reference.GetEntity(entity.Level) : null;
-        if (particles == null || !particles.Exists())
+        if (particles == null || !unity.UnityObject.exists(particles))
         {
             particles = CreateHealParticles(entity);
         }

@@ -5,6 +5,7 @@ import mvz2.options.KeyBindingOptions.SerializableKeyBindingOptions;  // IMPORTA
 
 // [Serializable]
 // [BsonIgnoreExtraElements]
+@:rtti
 class SerializableOptions {
     public function new() {}
     public var keyBindings:SerializableKeyBindingOptions;

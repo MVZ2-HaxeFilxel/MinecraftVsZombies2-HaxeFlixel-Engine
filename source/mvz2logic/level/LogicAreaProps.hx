@@ -57,7 +57,7 @@ class LogicAreaProps
 	//endregion
 
 	//region 门位置
-	public static var DOOR_Z:PropertyMeta<Float> = Get("doorZ");
+	public static var DOOR_Z:PropertyMeta<Float> = Get("doorZ", 0.0);
 	public static function GetDoorZ(game:LevelEngine):Float
 	{
 		return game.GetProperty(DOOR_Z);

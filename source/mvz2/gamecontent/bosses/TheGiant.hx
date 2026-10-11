@@ -62,6 +62,7 @@ import tools.FrameTimer;
 import unity.Mathf;
 import unity.Vector2Int;
 import unity.Vector3;
+import unity.UnityObject;
 
 using mvz2.vanilla.entities.VanillaColliderExt;
 using mvz2.vanilla.entities.VanillaEntityExt;
@@ -123,7 +124,7 @@ class TheGiant extends BossBehaviour
         var self = collision.Entity;
         if (self.IsDead)
             return;
-        if (!other.Exists() || !other.IsHostile(self))
+        if (!unity.UnityObject.exists(other) || !other.IsHostile(self))
             return;
         if (self.State == STATE_SNAKE)
         {
@@ -440,7 +441,7 @@ class TheGiant extends BossBehaviour
         for (blockID in blocks)
         {
             var block = blockID.GetEntity(parent.Level);
-            if (block == null || !block.Exists())
+            if (block == null || !unity.UnityObject.exists(block))
                 continue;
             block.Remove();
         }
@@ -468,7 +469,7 @@ class TheGiant extends BossBehaviour
         for (tailID in tails)
         {
             var tail = tailID.GetEntity(parent.Level);
-            if (tail == null || !tail.Exists())
+            if (tail == null || !unity.UnityObject.exists(tail))
                 continue;
             tail.Remove();
         }
@@ -1081,7 +1082,7 @@ private class DisassemblyState extends EntityStateMachineState
                             for (blockID in blocks)
                             {
                                 var block = blockID.GetEntity(entity.Level);
-                                if (block == null || !block.Exists())
+                                if (block == null || !unity.UnityObject.exists(block))
                                     continue;
                                 ZombieBlock.SetMode(block, ZombieBlock.MODE_TRANSFORM);
                                 ZombieBlock.SetTargetPosition(block, entity.Position);
@@ -1571,7 +1572,7 @@ private class PacmanState extends EntityStateMachineState
                             for (blockID in blocks)
                             {
                                 var block = blockID.GetEntity(entity.Level);
-                                if (block == null || !block.Exists())
+                                if (block == null || !unity.UnityObject.exists(block))
                                     continue;
                                 ZombieBlock.SetMode(block, ZombieBlock.MODE_TRANSFORM);
                                 ZombieBlock.SetTargetPosition(block, entity.Position);
@@ -1771,7 +1772,7 @@ private class SnakeState extends EntityStateMachineState
                             {
                                 var blockID = blocks[i];
                                 var block = blockID.GetEntity(entity.Level);
-                                if (block == null || !block.Exists())
+                                if (block == null || !unity.UnityObject.exists(block))
                                     continue;
                                 if (i == 0)
                                 {
@@ -1835,7 +1836,7 @@ private class SnakeState extends EntityStateMachineState
                             for (blockID in blocks)
                             {
                                 var block = blockID.GetEntity(entity.Level);
-                                if (block == null || !block.Exists())
+                                if (block == null || !unity.UnityObject.exists(block))
                                     continue;
                                 ZombieBlock.SetMode(block, ZombieBlock.MODE_TRANSFORM);
                                 ZombieBlock.SetTargetPosition(block, entity.Position);
@@ -1940,7 +1941,7 @@ private class SnakeState extends EntityStateMachineState
         var blocks = GetGridZombieBlocks(level, gridPosition);
         for (block in blocks)
         {
-            if (block == null || !block.Exists())
+            if (block == null || !unity.UnityObject.exists(block))
                 continue;
             block.Remove();
             entity.PlaySound(VanillaSoundID.pacmanKill);

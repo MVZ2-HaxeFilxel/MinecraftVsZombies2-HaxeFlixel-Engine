@@ -139,6 +139,7 @@ class ModelUpdateGroup extends unity.MonoBehaviour
 	private var particles:Array<ParticlePlayer> = [];
 }
 
+@:rtti
 class SerializableModelUpdateGroup
 {
 	public var animators:Array<SerializableAnimator>;

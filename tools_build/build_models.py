@@ -72,7 +72,7 @@ JSON），本脚本的输出格式可以直接对拍。
   "asset": "Assets/GameContent/Assets/mvz2/models/contraption/prologue/dispenser.prefab",
   "guid": "44cdfd7f2b25992498a3440f8b99e6da",
   "roots": [0],                       # 顶层节点（Unity prefab 应有且仅有一个）
-  "nodes": [
+  "nodes": [                         # DFS 先序（父下标 < 全部子下标；兄弟顺序 == m_Children 顺序）
     {
       "name": "dispenser",            # GameObject.m_Name
       "active": true,                 # m_IsActive
@@ -1455,30 +1455,60 @@ def build_node_graph(resolved, project):
             warnings.append("节点 %s 没有 Transform" % node["name"])
 
     # 父子关系。
-    for key, node in zip(node_index_of_go.keys(), nodes):
-        rec = objects[key]
-        tr = None
-        for entry in rec["data"].get("m_Component") or []:
+    #
+    # PORT-NOTE: children 的顺序必须按**父 Transform 的 m_Children 数组顺序**生成，不能按
+    # YAML 文档序追加。运行期两个加载器都按节点下标升序 SetParent（ScenePrefabLoader.hx 与
+    # ModelPrefabLoader.hx 的「4) 恢复父子关系（按 m_Children 顺序）」），shim 的
+    # Transform.SetParent 是 push 到父级 children 末尾——兄弟节点的入表顺序即渲染 z-order
+    # （UiRenderer.walk 按 children 顺序遍历）。而 YAML 文档序与 m_Children 序无关：
+    # Titlescreen 实例化 LanguageDialog 时，Dialog 的文档序是 MainElements/TitleArea/
+    # Background，m_Children 却是 Background/TitleArea/MainElements，按文档序导出会让
+    # Background 盖在标题和按钮上。
+    # 父级归属仍由子节点自己的 m_Father 决定（解析不到时留作孤儿根，交给下面的兜底挂载）；
+    # m_Children 只决定兄弟顺序，m_Children 里找不到的子节点按文档序排在末尾。
+
+    # 每个节点下标 -> 其 Transform/RectTransform 对象记录。
+    node_transform = {}
+    for key, idx in node_index_of_go.items():
+        for entry in objects[key]["data"].get("m_Component") or []:
             comp_key = _ref_key_of(entry.get("component"))
             comp = objects.get(comp_key)
             if comp is not None and comp["class"] in ("Transform", "RectTransform"):
-                tr = comp
+                node_transform[idx] = comp
                 break
+
+    for idx, node in enumerate(nodes):
+        tr = node_transform.get(idx)
         if tr is None:
             continue
-        parent_key = _ref_key_of(tr["data"].get("m_Father"))
-        if parent_key is not None and parent_key in transform_keys:
-            parent_go = transform_keys[parent_key]
-            parent_idx = node_index_of_go.get(parent_go)
-            if parent_idx is not None:
-                node["parent"] = parent_idx
-                nodes[parent_idx]["children"].append(node_index_of_go[key])
+        parent_go = transform_keys.get(_ref_key_of(tr["data"].get("m_Father")))
+        if parent_go is None:
+            continue
+        parent_idx = node_index_of_go.get(parent_go)
+        if parent_idx is not None:
+            node["parent"] = parent_idx
 
-    # 引用 -> 下标
-    for node in nodes:
-        node["components"] = [_encode_refs(c, node_index_of_go, object_owner) for c in node["components"]]
-        if node["transform"] is not None:
-            node["transform"] = _encode_refs(node["transform"], node_index_of_go, object_owner)
+    children_by_parent = {}
+    for idx, node in enumerate(nodes):
+        children_by_parent.setdefault(node["parent"], []).append(idx)
+    for idx, node in enumerate(nodes):
+        children = children_by_parent.get(idx)
+        if not children:
+            continue
+        tr = node_transform.get(idx)
+        if tr is not None:
+            # m_Children 里的 child transform fileID -> GameObject key -> 节点下标；
+            # 自引用与重复项取先出现的位置。
+            rank = {}
+            for pos, child in enumerate(tr["data"].get("m_Children") or []):
+                child_go = transform_keys.get(_ref_key_of(child))
+                child_idx = node_index_of_go.get(child_go) if child_go is not None else None
+                if child_idx is None or child_idx == idx or child_idx in rank:
+                    continue
+                rank[child_idx] = pos
+            # list.sort 稳定：不在 m_Children 里的子节点保持文档序、追加到末尾兜底。
+            children.sort(key=lambda c: rank.get(c, len(rank)))
+        node["children"] = children
 
     roots = [i for i, n in enumerate(nodes) if n["parent"] is None]
 
@@ -1502,6 +1532,41 @@ def build_node_graph(resolved, project):
                 warnings.append("节点 %s 的挂载父级在 prefab 里无法解析，已挂回资产根" % node["name"])
             roots = [primary]
             warnings.append("悬空挂载点导致的孤儿根：%d 个" % stray_count)
+
+    # 树建完后按 DFS 先序重排 nodes：父节点下标 < 其全部子节点下标，且兄弟节点的数组
+    # 顺序 == children 顺序 == m_Children 顺序（运行期按数组顺序 SetParent，见上面
+    # 父子关系处的 PORT-NOTE）。object_owner 的值存的是 GameObject key 而不是节点下标，
+    # 不需要跟着重排更新；_encode_refs 走下标，所以重排必须发生在它之前。
+    order = []
+    seen = set()
+    stack = list(reversed(roots))
+    while stack:
+        idx = stack.pop()
+        if idx in seen:
+            continue
+        seen.add(idx)
+        order.append(idx)
+        stack.extend(reversed(nodes[idx]["children"]))
+    if len(order) < len(nodes):  # 不可达节点（只有数据损坏的环才会出现）按原序兜底
+        order.extend(i for i in range(len(nodes)) if i not in seen)
+    new_index = {old: new for new, old in enumerate(order)}
+    reordered = []
+    for old_idx in order:
+        node = nodes[old_idx]
+        parent = node["parent"]
+        node["parent"] = new_index[parent] if parent is not None else None
+        node["children"] = [new_index[c] for c in node["children"]]
+        reordered.append(node)
+    nodes = reordered
+    node_index_of_go = {node["key"]: i for i, node in enumerate(nodes)}
+
+    # 引用 -> 下标（重排之后的最终下标）。
+    for node in nodes:
+        node["components"] = [_encode_refs(c, node_index_of_go, object_owner) for c in node["components"]]
+        if node["transform"] is not None:
+            node["transform"] = _encode_refs(node["transform"], node_index_of_go, object_owner)
+
+    roots = [i for i, n in enumerate(nodes) if n["parent"] is None]
 
     for i, node in enumerate(nodes):
         node.pop("key", None)

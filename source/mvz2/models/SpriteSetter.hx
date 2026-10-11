@@ -6,6 +6,7 @@ import Main;  // UNKNOWNIMPORT
 import unity.Mathf;
 import unity.Sprite;
 import unity.SpriteRenderer;
+import unity.UnityObject;
 
 // [RequireComponent(typeof(SpriteRenderer))]
 // abstract
@@ -45,7 +46,7 @@ class SpriteSetter extends ModelComponent {
     }
     private var Renderer(get, never):SpriteRenderer;
     function get_Renderer():SpriteRenderer {
-        if (!sprRenderer.Exists()) {
+        if (!unity.UnityObject.exists(sprRenderer)) {
             sprRenderer = GetComponent(SpriteRenderer);
         }
         return sprRenderer;

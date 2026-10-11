@@ -10,6 +10,18 @@ class Transform extends Component {
     public var localScale:Vector3 = new Vector3(1, 1, 1);
     public var localRotation:Quaternion = new Quaternion();
     public var rotation:Quaternion = new Quaternion();
+
+    // PORT-NOTE(防堆损坏): 这 5 个 RectTransform 字段上移到 Transform。游戏代码大量
+    // `cast transform` 成 RectTransform 后直接写字段（如 Graphic.rectTransform、
+    // Tooltip.SetPosition），而 ScenePrefabLoader 对无 rect 数据的节点只建普通
+    // Transform。hxcpp 的 cast 不做运行期检查，子类字段写会落在普通 Transform 的
+    // 分配边界之外，踩坏相邻 GC 对象（随机段错误的根因之一）。字段上移后两类实例
+    // 内存布局一致，这类 cast 在内存层面变为安全。
+    public var anchoredPosition:Vector2 = new Vector2(0, 0);
+    public var sizeDelta:Vector2 = new Vector2(0, 0);
+    public var anchorMin:Vector2 = new Vector2(0.5, 0.5);
+    public var anchorMax:Vector2 = new Vector2(0.5, 0.5);
+    public var pivot:Vector2 = new Vector2(0.5, 0.5);
     public var eulerAngles(get, set):Vector3;
     function get_eulerAngles():Vector3 return rotation.eulerAngles;
     function set_eulerAngles(v:Vector3):Vector3 {

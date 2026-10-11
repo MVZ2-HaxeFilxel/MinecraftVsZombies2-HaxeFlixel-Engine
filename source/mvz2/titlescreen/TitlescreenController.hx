@@ -49,6 +49,7 @@ class TitlescreenController extends ScenePage {
     private function OnButtonClickCallback():Void {
         if (!main.OptionsManager.IsLanguageInitialized()) {
             var languages = main.LanguageManager.GetAllLanguageCodes();
+            mvz2.states.BootTrace.step('语言对话框：codes=${languages}');
             ui.ShowLanguageDialog(Lambda.array(Lambda.map(languages, l -> main.LanguageManager.GetLanguageName(l))));
         } else {
             main.Scene.DisplayMainmenu();

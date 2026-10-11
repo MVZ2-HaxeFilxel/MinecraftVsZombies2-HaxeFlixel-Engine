@@ -7,6 +7,7 @@ import unity.Vector3;
 
 // PORT-NOTE: C# 的显式接口实现（`string? ISerializableCollisionCollider.Name => name;` 等）在 Haxe 中
 //   改为普通的只读属性 + getter；公开字段名保持与 C# 一致（name / collisionList / ...）。
+@:rtti
 class SerializableEntityCollider implements ISerializableCollisionCollider
 {
 	public function new() {}

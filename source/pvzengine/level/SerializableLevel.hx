@@ -16,6 +16,7 @@ import pvzengine.seedpacks.SerializableSeedPack.SerializableClassicSeedPack;
 import pvzengine.seedpacks.SerializableSeedPack.SerializableConveyorSeedPack;
 import tools.SerializableRNG;
 
+@:rtti
 class SerializableLevel
 {
 	private var isRerun:Bool;
@@ -75,6 +76,7 @@ class SerializableLevel
 	public function new() {}
 }
 
+@:rtti
 class SerializableDelayedEnergy
 {
 	public var entityId:Int64;

@@ -21,8 +21,5 @@ class Outline extends Shadow {
     }
 }
 
-// Minimal UnityEngine.UI.LayoutRebuilder shim.
-class LayoutRebuilder {
-    public static function ForceRebuildLayoutImmediate(layoutRoot:unity.RectTransform):Void {}
-    public static function MarkLayoutForRebuild(rect:unity.RectTransform):Void {}
-}
+// PORT-NOTE: UnityEngine.UI.LayoutRebuilder 的兼容入口已并入真正的布局引擎
+// unity/ui/LayoutRebuilder.hx（本文件再声明同名类会与该模块的类型冲突）。

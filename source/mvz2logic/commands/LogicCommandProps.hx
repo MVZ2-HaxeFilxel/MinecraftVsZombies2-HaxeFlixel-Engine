@@ -7,9 +7,9 @@ import pvzengine.PropertyMeta;
 @:propertyRegistryRegion(LogicPropertyRegions.command)
 class LogicCommandProps
 {
-	private static function Get<T>(name:String):PropertyMeta<T>
+	private static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
 	{
-		return new PropertyMeta<T>(name);
+		return new PropertyMeta<T>(name, defaultValue);
 	}
 
 	// #region 描述
@@ -20,7 +20,7 @@ class LogicCommandProps
 	// #endregion
 
 	// #region 必须在关卡中
-	public static var MUST_IN_LEVEL:PropertyMeta<Bool> = Get("must_in_level");
+	public static var MUST_IN_LEVEL:PropertyMeta<Bool> = Get("must_in_level", false);
 	public static function MustInLevel(def:CommandDefinition):Bool return def.GetProperty(MUST_IN_LEVEL);
 	// #endregion
 

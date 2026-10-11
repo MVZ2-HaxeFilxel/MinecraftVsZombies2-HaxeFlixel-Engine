@@ -5,6 +5,7 @@ import mvz2logic.blueprints.BlueprintChooseItem;
 import pvzengine.NamespaceID;
 
 // [Serializable]
+@:rtti
 class BlueprintChooseSaveItem
 {
 	public var id:NamespaceID;

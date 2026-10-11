@@ -14,7 +14,7 @@ class LogicBossProps
 	}
 
 	//region 无害
-	public static var DONT_COUNT_BOSS_HP:PropertyMeta<Bool> = Get("dont_count_boss_hp");
+	public static var DONT_COUNT_BOSS_HP:PropertyMeta<Bool> = Get("dont_count_boss_hp", false);
 	public static function DontCountBossHP(enemy:Entity):Bool
 	{
 		return enemy.GetProperty(DONT_COUNT_BOSS_HP);

@@ -1406,7 +1406,7 @@ class Entity implements ILevelSourceTarget implements IAuraSource implements IMo
 	// #endregion
 
 	// #region 属性字段 (Entity_Physics.cs)
-	public var PreviousPosition(default, null):Vector3;
+	public var PreviousPosition(default, null):Vector3 = new Vector3(0, 0, 0); // PORT-NOTE: C# Vector3 为 struct，默认 (0,0,0)；LevelEngine.SpawnSourced 在 Entity.Init()（首个赋值点）之前就 InitEntityCollision，无初值会 null 解引用（GetCollisionRect 崩）
 	public var Position(get, set):Vector3;
 	function get_Position():Vector3
 	{

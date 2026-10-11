@@ -3,6 +3,9 @@ package mvz2.scenes;
 
 import haxe.Json;
 import mvz2.models.ModelPrefabContext;
+// PORT-NOTE: ModelPrefabTransform 是 mvz2.models.ModelPrefabData 模块内的 typedef，
+// 跨模块引用必须显式 import 该类型（与 ScenePrefabData 的处理相同）。
+import mvz2.models.ModelPrefabData.ModelPrefabTransform;
 import mvz2.scenes.ScenePrefabData;
 import sys.io.File;
 import unity.Component;
@@ -219,8 +222,10 @@ class ScenePrefabLoader {
 		for (i in 0...data.nodes.length) {
 			var node = data.nodes[i];
 			if (i == overrideIndex) {
-				// PORT-NOTE: 接管已有对象 —— 保留它的 Transform / 组件（手工构造的页面控制器
-				// 就在这上面），只把它的组件按类型映射进 ctx，好让第 3 步把 prefab 字段写上去。
+				// PORT-NOTE: 接管已有对象 —— 组件不重建（手工构造的页面控制器就在这上面），
+				// 只把它的组件按类型映射进 ctx，好让第 3 步把 prefab 字段写上去。
+				// Transform 本身也保留（父级/位置/激活态不动），但 rect 等字段由
+				// applyRootTransform 按数据写（对齐 Unity prefab 覆盖语义）。
 				ctx.gameObjects.push(rootOverride);
 				var existing:Array<Component> = [rootOverride.transform];
 				var used:Array<Component> = [];
@@ -242,6 +247,9 @@ class ScenePrefabLoader {
 					existing.push(found);
 				}
 				ctx.components.push(existing);
+				// PORT-NOTE: 接管模式下也要把 JSON 根节点的 transform 写到已存在的根对象上
+				//（见 applyRootTransform）。原先整段跳过，对话框/页面根的 rect 停在默认值。
+				applyRootTransform(rootOverride, node.transform, existing);
 				continue;
 			}
 			var go = new GameObject(node.name);
@@ -446,6 +454,82 @@ class ScenePrefabLoader {
 	}
 	static function _quat(a:Array<Float>):Quaternion {
 		return a != null && a.length >= 4 ? new Quaternion(a[0], a[1], a[2], a[3]) : new Quaternion(0, 0, 0, 1);
+	}
+
+	/**
+	 * 根接管模式下，把 JSON 根节点的 transform 应用到调用方已建好的根对象上。
+	 *
+	 * PORT-NOTE: 非接管路径为每个新建节点写 pos/rot/scale，`td.rect != null` 时再换成一个
+	 * 填好 anchor/pivot/sizeDelta 的 RectTransform。接管路径原先**整段跳过** transform 写入
+	 * （原意是保留手工构造的 Transform），于是 `childRect()` / `page()` 建出来的根停在
+	 * `RectTransform` 的默认值（anchorMin/Max=(0.5,0.5)、sizeDelta=(0,0)）—— 对话框根 rect
+	 * 塌成 1×1，`UiRenderer.childFrame` 的 anchor 数学与命中测试全错。
+	 *
+	 * 对齐 Unity 的 Instantiate 语义：prefab 实例会用 prefab 根节点的 rect 字段
+	 * （anchoredPosition / sizeDelta / anchorMin / anchorMax / pivot）覆盖已存在的对象，
+	 * 旋转/缩放同样取自 prefab；位置、父级、名字、激活态等接管方已有的关键设置保持不动
+	 * （页面根由 `page()` 刻意设为未激活，等 `MainSceneController.DisplayPage` 切换，
+	 * 因此这里**不**写 `active`）。
+	 *
+	 * 数据根是 RectTransform 而接管对象上是普通 Transform 时（DebugConsole / Credits /
+	 * AchievementHint 三个页面走 `page()`，拿到的是普通 Transform），现场换成 RectTransform：
+	 * 换掉父级 children 表里的槽位、搬走旧 Transform 的子节点、并把根对象上各组件的
+	 * `transform` 引用改到新实例 —— 与非接管路径 `go.transform = rt` 的效果一致，
+	 * 只是发生在挂载之后。
+	 */
+	static function applyRootTransform(go:GameObject, td:Null<ModelPrefabTransform>,
+			existing:Array<Component>):Void {
+		if (go == null || td == null)
+			return;
+		var tr = go.transform;
+		if (tr == null)
+			return;
+		if (td.rect != null) {
+			var rt:RectTransform = Std.isOfType(tr, RectTransform) ? cast(tr, RectTransform) : null;
+			if (rt == null) {
+				rt = new RectTransform();
+				rt.name = tr.name;
+				rt.gameObject = go;
+				// 接管方已摆好的位置/旋转/缩放先照搬过去（下面只覆盖 rect 字段与旋转/缩放）。
+				rt.localPosition = tr.localPosition;
+				rt.localRotation = tr.localRotation;
+				rt.localScale = tr.localScale;
+				// 根对象已被调用方挂到目标父级上：换掉父级 children 表里的槽位，保持挂载关系。
+				var oldParent = tr.parent;
+				if (oldParent != null) {
+					var slot = oldParent.children.indexOf(tr);
+					if (slot >= 0)
+						oldParent.children[slot] = rt;
+					else
+						oldParent.children.push(rt);
+				}
+				rt.parent = oldParent;
+				// 旧 Transform 上的子节点（若有）转移到新 RectTransform 下。
+				var oldChildren = tr.children.copy();
+				tr.children = [];
+				for (c in oldChildren) {
+					c.parent = rt;
+					rt.children.push(c);
+				}
+				go.transform = rt;
+				// 手工挂上的组件持有旧 Transform 引用，逐个改到新 RectTransform 上。
+				for (comp in go.GetAllComponents()) {
+					if (comp != null && comp.transform == tr)
+						comp.transform = rt;
+				}
+				existing[0] = rt;
+				tr = rt;
+			}
+			rt.anchoredPosition = _v2(td.rect.anchoredPosition, 0, 0);
+			rt.sizeDelta = _v2(td.rect.sizeDelta, 0, 0);
+			rt.anchorMin = _v2(td.rect.anchorMin, 0.5, 0.5);
+			rt.anchorMax = _v2(td.rect.anchorMax, 0.5, 0.5);
+			rt.pivot = _v2(td.rect.pivot, 0.5, 0.5);
+		}
+		// 位置保留接管方已有的值（原 Unity 行为：prefab 实例化覆盖 rect 字段，不动调用方摆好的
+		// 位置；实测这些根的数据 pos 也都是 (0,0,0)，与接管方默认值一致）。
+		tr.localRotation = _quat(td.rot);
+		tr.localScale = _v3(td.scale, 1, 1, 1);
 	}
 	// #endregion
 }

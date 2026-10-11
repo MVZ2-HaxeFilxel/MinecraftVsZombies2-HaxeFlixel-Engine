@@ -48,6 +48,7 @@ class UIModel extends Model
 	private var group:ModelGroupUI;
 }
 
+@:rtti
 class SerializableUIModelData extends SerializableModelData
 {
 	public function new()

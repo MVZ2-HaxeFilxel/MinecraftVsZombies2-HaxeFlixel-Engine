@@ -82,6 +82,7 @@ import unity.Mathf;
 import unity.Vector2;
 import unity.Vector2Int;
 import unity.Vector3;
+import unity.UnityObject;
 
 // PORT-NOTE: C# 扩展方法 → 以 Entity / DamageOutput / ShellDefinition 为首参的静态方法（PORTING.md §扩展方法）。
 // PORT-NOTE: C# `using GridLayerData = System.Tuple<LawnGrid, NamespaceID>;` → 模块子类型 GridLayerData。
@@ -313,10 +314,10 @@ class VanillaEntityExt
             return;
         var shineRingID:Null<EntityID> = entity.GetProperty(PROP_SHINE_RING);
         var shineRing = shineRingID != null ? shineRingID.GetEntity(entity.Level) : null;
-        if (shineRing != null && shineRing.Exists())
+        if (shineRing != null && unity.UnityObject.exists(shineRing))
             return;
         shineRing = entity.Level.FindFirstEntity(e -> e.IsEntityOf(VanillaEffectID.shineRing) && e.Parent == entity);
-        if (shineRing == null || !shineRing.Exists())
+        if (shineRing == null || !unity.UnityObject.exists(shineRing))
         {
             // PORT-NOTE: C# `?.Let(e => {...})` → 显式判空块。
             shineRing = entity.Level.Spawn(VanillaEffectID.shineRing, entity.Position, entity);

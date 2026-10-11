@@ -5,6 +5,7 @@
 //   删除操作与 C# 一致地在遍历结束后统一执行（removeBuffBuffer）。
 package pvzengine.auras;
 
+import unity.UnityObject;
 import pvzengine.base.ArrayBuffer;
 import pvzengine.buffs.Buff;
 import pvzengine.buffs.IBuffTarget;
@@ -59,7 +60,7 @@ class AuraEffect
 	}
 	public function UpdateAura():Void
 	{
-		if (!Source.Exists())
+		if (!unity.UnityObject.exists(Source))
 			return;
 		var level = Source.GetLevel();
 		targetsBuffer.resize(0);
@@ -67,7 +68,7 @@ class AuraEffect
 		for (target in targetsBuffer)
 		{
 			var buff = GetTargetBuff(target);
-			if (buff == null || buff.Target == null || !buff.Target.Exists())
+			if (buff == null || buff.Target == null || !unity.UnityObject.exists(buff.Target))
 			{
 				buff = AddTargetBuff(target);
 			}
@@ -77,7 +78,7 @@ class AuraEffect
 		removeBuffBuffer.Clear();
 		for (target in buffCaches.keys())
 		{
-			if (!target.Exists() || targetsBuffer.indexOf(target) < 0)
+			if (!unity.UnityObject.exists(target) || targetsBuffer.indexOf(target) < 0)
 			{
 				var buff = buffCaches.get(target);
 				target.RemoveBuff(buff);

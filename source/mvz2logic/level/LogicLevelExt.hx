@@ -340,7 +340,11 @@ class LogicLevelExt
 	public static function CreatePreviewEnemiesFromEnemyPool(level:LevelEngine, region:Rect):Void
 	{
 		var pool = LogicStageProps.GetEnemyPool(level);
-		var spawnIDs = Lambda.filter(pool, function(e) return NamespaceID.IsValid(e));
+		// PORT-NOTE: 教学关（prologue）等没有配置 enemyPool，属性取不到值为 null。
+		// C# 侧该数组由关卡数据写入；缺失时直接跳过预览敌人生成（无预览敌人）。
+		if (pool == null)
+			return;
+		var spawnIDs = Lambda.filter(pool, function(e) return e != null && NamespaceID.IsValid(e));
 		CreatePreviewEnemies(level, spawnIDs, region);
 	}
 	public static function RemovePreviewEnemies(level:LevelEngine):Void

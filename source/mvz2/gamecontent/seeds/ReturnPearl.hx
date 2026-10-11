@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Seeds/ReturnPearl.cs
 package mvz2.gamecontent.seeds;
 
+import unity.UnityObject;
 import mvz2.gamecontent.effects.BreakoutBoard;
 import mvz2.gamecontent.effects.VanillaEffectID;
 import mvz2.gamecontent.projectiles.VanillaProjectileID;
@@ -43,7 +44,7 @@ class ReturnPearl extends SeedOptionDefinition
         var pearl = level.FindFirstEntity(VanillaProjectileID.breakoutPearl);
         if (pearl == null)
             return;
-        var board = level.FindFirstEntity(e -> e.IsEntityOf(VanillaEffectID.breakoutBoard) && (e.Target == null || !e.Target.Exists()));
+        var board = level.FindFirstEntity(e -> e.IsEntityOf(VanillaEffectID.breakoutBoard) && (e.Target == null || !unity.UnityObject.exists(e.Target)));
         if (board == null)
             return;
         BreakoutBoard.ReturnPearl(board, pearl);
@@ -55,7 +56,7 @@ class ReturnPearl extends SeedOptionDefinition
         var pearl = level.FindFirstEntity(VanillaProjectileID.breakoutPearl);
         if (pearl == null)
             return false;
-        var board = level.FindFirstEntity(e -> e.IsEntityOf(VanillaEffectID.breakoutBoard) && (e.Target == null || !e.Target.Exists()));
+        var board = level.FindFirstEntity(e -> e.IsEntityOf(VanillaEffectID.breakoutBoard) && (e.Target == null || !unity.UnityObject.exists(e.Target)));
         if (board == null)
             return false;
         return true;

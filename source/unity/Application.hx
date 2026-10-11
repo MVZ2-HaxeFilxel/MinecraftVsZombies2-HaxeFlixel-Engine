@@ -1,6 +1,9 @@
 package unity;
 
 // Minimal UnityEngine.Application shim.
+// PORT-NOTE: `version` 的真实值由编译期宏从 HaxePort/Project.xml 的 `<app version="..."/>`
+// 注入（见 ApplicationVersionMacro.hx）；下面的 "0.0.0" 只是宏读取失败时的回落初值。
+@:build(unity.ApplicationVersionMacro.build())
 class Application {
     public static var persistentDataPath(get, never):String;
     public static var dataPath(get, never):String;

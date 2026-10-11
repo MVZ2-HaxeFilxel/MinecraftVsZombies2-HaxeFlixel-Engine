@@ -24,6 +24,7 @@ import pvzengine.entities.EntityCollisionHelper;
 import pvzengine.entities.EntityID;
 import pvzengine.entities.EntityTypes;
 import unity.Vector3;
+import unity.UnityObject;
 using mvz2.vanilla.entities.VanillaEntityExt;
 using mvz2.vanilla.entities.VanillaEntityProps;
 using mvz2logic.entities.LogicContraptionProps;
@@ -237,7 +238,7 @@ class ForcePad extends ContraptionBehaviour
             {
                 var target = targetID.GetEntity(pad.Level);
                 // 不存在或者死亡的目标被排除在外。
-                if (target == null || !target.Exists() || target.IsDead)
+                if (target == null || !unity.UnityObject.exists(target) || target.IsDead)
                     continue;
                 hasValidEntity = true;
 

@@ -8,6 +8,7 @@ import mvz2.supporters.SponsorQueryResults.SponsorItem;
 import mvz2.supporters.SponsorQueryResults.User;
 
 // Ported from: Assets/Scripts/MVZ2/Sponsors/SponsorSaveItem.cs (class SponsorInfos)
+@:rtti
 class SponsorInfos {
     public function new(items:Array<SponsorItem>) {
         var saveItems:Array<SponsorSaveItem> = [];

@@ -9,7 +9,7 @@ import unity.ui.UIBehaviour;
 import mvz2.gamecontent.commands.Clear;
 import unity.Mathf;
 import unity.ui.Selectable.ILayoutElement;
-import unity.ui.Shadow.LayoutRebuilder;
+import unity.ui.LayoutRebuilder;
 
 // @:RequireComponent(RectTransform)
 // @:ExecuteAlways

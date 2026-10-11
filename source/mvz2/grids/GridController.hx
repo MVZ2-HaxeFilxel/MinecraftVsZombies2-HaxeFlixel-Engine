@@ -244,6 +244,7 @@ class GridControllerData {
     public function new() {}
 }
 
+@:rtti
 class SerializableGridController {
     public var model:Dynamic;
 

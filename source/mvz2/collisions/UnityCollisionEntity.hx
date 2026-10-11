@@ -162,6 +162,7 @@ class UnityCollisionEntity extends MonoBehaviour {
     private var colliderRoot:Transform = null;
 }
 
+@:rtti
 class SerializableUnityCollisionEntity implements ISerializableCollisionEntity {
     public var id:Int64;
     public var colliders:Array<SerializableUnityEntityCollider>;

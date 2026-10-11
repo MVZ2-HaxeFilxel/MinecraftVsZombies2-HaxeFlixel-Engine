@@ -13,6 +13,7 @@ import pvzengine.level.ILevelSourceReference;
 import pvzengine.level.ISerializableSourceReference;
 
 // [Serializable]
+@:rtti
 class SerializableDeathInfo
 {
     public function new(deathInfo:DeathInfo)

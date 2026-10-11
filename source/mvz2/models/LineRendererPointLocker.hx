@@ -4,6 +4,7 @@ package mvz2.models;
 import tools.ObjectExtensions;
 import unity.LineRenderer;
 import unity.Transform;
+import unity.UnityObject;
 
 // [ExecuteAlways]
 // [RequireComponent(typeof(LineRenderer))]
@@ -15,7 +16,7 @@ class LineRendererPointLocker extends ModelComponent {
     override public function UpdateFrame(deltaTime:Float):Void {
         super.UpdateFrame(deltaTime);
         var renderer = line;
-        if (!renderer.Exists() || index < 0 || index >= renderer.positionCount)
+        if (!unity.UnityObject.exists(renderer) || index < 0 || index >= renderer.positionCount)
             return;
         if (target == null)
             return;
@@ -27,7 +28,7 @@ class LineRendererPointLocker extends ModelComponent {
     }
     private var line(get, never):LineRenderer;
     function get_line():LineRenderer {
-        if (!_line.Exists()) {
+        if (!unity.UnityObject.exists(_line)) {
             _line = GetComponent(LineRenderer);
         }
         return _line;

@@ -1,6 +1,7 @@
 package unity;
 
 // Minimal UnityEngine.Vector4 shim.
+@:rtti
 class Vector4 {
     public var x:Float;
     public var y:Float;

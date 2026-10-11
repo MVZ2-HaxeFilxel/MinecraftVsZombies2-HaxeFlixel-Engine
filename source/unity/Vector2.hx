@@ -81,6 +81,7 @@ abstract Vector2(Vector2Data) from Vector2Data to Vector2Data {
     }
 }
 
+@:rtti
 class Vector2Data {
     public var x:Float;
     public var y:Float;

@@ -13,7 +13,7 @@ import unity.ui.ScrollRect;
 import unity.tmpro.TextMeshProUGUI;
 import mvz2.ui.almanac.AlmanacDescriptionTag.AlmanacDescriptionTagViewData;
 import mvz2.ui.almanac.AlmanacTagIcon.AlmanacTagIconViewData;
-import unity.ui.Shadow.LayoutRebuilder;
+import unity.ui.LayoutRebuilder;
 import flixel.util.FlxSignal;
 
 // abstract

@@ -615,6 +615,7 @@ enum abstract VisibleState(Int)
 
 // C# 中为 MVZ2.UI.Level 的 SerializableLevelUIPreset 类（[Serializable]）。
 @:serialize
+@:rtti
 class SerializableLevelUIPreset
 {
 	public var animator:Null<SerializableAnimator>;

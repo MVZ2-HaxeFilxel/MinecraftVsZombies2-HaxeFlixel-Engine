@@ -29,6 +29,7 @@ import tools.Ticks;
 import tools.TimerHelper;
 import unity.Color;
 import unity.Vector3;
+import unity.UnityObject;
 using mvz2.vanilla.entities.VanillaEntityExt;
 using mvz2.vanilla.entities.VanillaEntityProps;
 using mvz2logic.entities.LogicEntityExt;
@@ -59,7 +60,7 @@ class ExplosiveLargeFireball extends EntityBehaviourDefinition implements IBeBlo
         var other = collision.Other;
         if (other.Type != EntityTypes.BOSS || !self.IsHostile(other))
             return;
-        if (!self.Exists())
+        if (!unity.UnityObject.exists(self))
             return;
         Explode(self);
     }

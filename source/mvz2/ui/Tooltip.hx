@@ -9,7 +9,7 @@ import unity.ui.Shadow;
 import unity.tmpro.TextMeshProUGUI;
 import unity.MonoBehaviour;
 import unity.Vector3;
-import unity.ui.Shadow.LayoutRebuilder;
+import unity.ui.LayoutRebuilder;
 
 class Tooltip extends unity.MonoBehaviour
 {

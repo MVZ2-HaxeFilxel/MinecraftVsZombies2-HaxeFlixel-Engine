@@ -93,6 +93,7 @@ class PropertyBlock
 }
 
 // Ported from: Assets/Scripts/Engine/Level/Properties/PropertyBlock.cs (class SerializablePropertyBlock)
+@:rtti
 class SerializablePropertyBlock
 {
 	public function new() {}

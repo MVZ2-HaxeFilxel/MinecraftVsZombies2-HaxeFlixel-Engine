@@ -19,8 +19,8 @@ class VanillaAreaProps
     }
 
     //region 水颜色
-    public static var WATER_COLOR:PropertyMeta<Color> = Get("waterColor");
-    public static var WATER_COLOR_CENSORED:PropertyMeta<Color> = Get("waterColorCensored");
+    public static var WATER_COLOR:PropertyMeta<Color> = Get("waterColor", new Color(0, 0, 0, 0));
+    public static var WATER_COLOR_CENSORED:PropertyMeta<Color> = Get("waterColorCensored", new Color(0, 0, 0, 0));
     public static function GetWaterColorNormal(game:LevelEngine):Color
     {
         return game.GetProperty(WATER_COLOR);

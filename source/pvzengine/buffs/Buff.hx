@@ -29,6 +29,7 @@ import pvzengine.seedpacks.SeedPack;
 using pvzengine.buffs.BuffTargetExt;
 using pvzengine.ContentProviderHelper;
 import unity.Debug;
+import unity.UnityObject;
 
 @:using(pvzengine.buffs.EngineBuffProps)
 class Buff implements IAuraSource implements IModifierSource
@@ -163,7 +164,7 @@ class Buff implements IAuraSource implements IModifierSource
 	}
 	public function Exists():Bool
 	{
-		return Target != null && Target.Exists();
+		return Target != null && unity.UnityObject.exists(Target);
 	}
 	public function OnAddToLevel(level:LevelEngine):Void
 	{

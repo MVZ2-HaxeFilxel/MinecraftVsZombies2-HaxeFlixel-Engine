@@ -314,6 +314,7 @@ class LightComponent extends MVZ2Component implements ILightComponent
 	// #endregion
 }
 
+@:rtti
 class SerializableLightComponent implements ISerializableLevelComponent
 {
 	public var lightSources:Array<SerializableLightSourceInfo>;

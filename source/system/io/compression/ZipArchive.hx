@@ -23,6 +23,11 @@ class ZipArchive {
     public function new(?stream:Stream, ?mode:ZipArchiveMode) {
         this.stream = stream;
         this.Mode = mode != null ? mode : ZipArchiveMode.Read;
+        // PORT-NOTE: 读/更新模式必须在构造时就把条目读进来：静态 Open/OpenRead 会调 load()，
+        //   但直接 new ZipArchive(stream)（LanguageManager 的内置语言包 zip、SaveManager 的
+        //   用户数据包导入都这么用）不会，Entries 会停在空数组，整个 zip 被当成空包。
+        //   Create 模式下 load() 自行早退，不受影响。
+        load();
     }
 
     public static function Open(stream:Stream, mode:ZipArchiveMode):ZipArchive {

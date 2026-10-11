@@ -177,7 +177,10 @@ class SponsorManager extends MonoBehaviour {
         }
         var json = Main.FileManager.ReadStringFile(path);
         // PORT-NOTE: Bson deserialization replaced with JSON parsing.
-        return cast haxe.Json.parse(json);
+        // haxe.Json.parse 的匿名产物（hx::Anon）不能 cast 成真实类（内存布局不同会段错误），
+        // 且 SponsorInfos.lastUpdateTime 是 Int64——用 RTTI hydration 重建真实实例。
+        // 写入端是 haxe.Json.stringify 真实实例（键名与字段名一致），hydration 兼容。
+        return cast mvz2logic.serialization.TypedJson.hydrate(haxe.Json.parse(json), "mvz2.supporters.SponsorInfos");
     }
     private function SaveSponsorsCache(saveInfo:SponsorInfos):Void {
         var path = GetSponsorCacheFilePath();

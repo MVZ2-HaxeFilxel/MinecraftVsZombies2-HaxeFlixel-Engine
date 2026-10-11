@@ -7,6 +7,7 @@ import lime.media.AudioBuffer;
 import openfl.media.Sound;
 import unity.AudioSource.PlaybackSound;
 import unity.addressableassets.ResourceManifest;
+import unity.UnityObject;
 
 // Minimal UnityEngine.AudioClip shim.
 class AudioClip extends UnityObject {
@@ -47,8 +48,8 @@ class AudioClip extends UnityObject {
     }
 
     /**
-     * C# 的 `clip.Exists()`（UnityEngine.Object 的隐式 bool 转换）→ 移植层判断是否取到了音频数据。
-     * PORT-NOTE: 与 unity.UnityObject.Exists() 不同：AudioClip 的「存在」还要求能取到声音数据，
+     * C# 的 `unity.UnityObject.exists(clip)`（UnityEngine.Object 的隐式 bool 转换）→ 移植层判断是否取到了音频数据。
+     * PORT-NOTE: 与 unity.UnityObject.exists(unity.UnityObject) 不同：AudioClip 的「存在」还要求能取到声音数据，
      * 否则播放会静默失败（对应 Unity 里 clip 为 null/未加载）。
      */
     public function hasAudio():Bool {
@@ -66,13 +67,16 @@ class AudioClip extends UnityObject {
      */
     public function newSound(looped:Bool = false, ?onComplete:Void->Void):PlaybackSound {
         var source = getSoundData();
-        if (source == null)
+        if (source == null) {
+            // PORT-NOTE: 具体原因由 getSoundData/loadSoundData 的告警给出，这里只标出播放侧拿不到数据。
+            WarnOnce('newSound/$key', 'AudioClip「$key」取不到声音数据，无法创建播放对象。');
             return null;
+        }
         var flx = new PlaybackSound();
         flx.loadEmbedded(source, looped, false, onComplete);
         flx.autoDestroy = false;
         if (!flx.exists) {
-            Debug.LogWarning('AudioClip「${name}」的声音数据无法播放（${soundKey != null ? soundKey : "unknown"}）。');
+            WarnOnce('newSound-exists/$key', 'AudioClip「$key」的声音数据无法播放（loadEmbedded 后 exists=false）。');
             flx.destroy();
             return null;
         }
@@ -87,11 +91,13 @@ class AudioClip extends UnityObject {
             return sound;
         if (cachedSound != null)
             return cachedSound;
-        if (soundKey == null)
+        if (soundKey == null) {
+            WarnOnce('no-key/$key', 'AudioClip「$key」既没有解码好的 sound，也没有 soundKey，取不到音频数据。');
             return null;
+        }
         cachedSound = loadSoundData();
         if (cachedSound == null) {
-            Debug.LogWarning('音频数据加载失败：$soundKey（见 assets/audio_manifest.json）。');
+            WarnOnce('load-failed/$key', '音频数据加载失败：$soundKey（见 assets/audio_manifest.json）。');
             return null;
         }
         // PORT-NOTE: 兼容 unity.addressableassets.ResourceManifest 解码路径留出的字段契约
@@ -113,7 +119,7 @@ class AudioClip extends UnityObject {
                     return librarySound;
             }
         } catch (e:Dynamic) {
-            Debug.LogWarning('按 lime 资源 id 取音频失败：$soundKey（$e）');
+            WarnOnce('assets-get/$key', '按 lime 资源 id 取音频失败：$soundKey（$e）');
         }
         // 2) 直接从磁盘读（与 unity.addressableassets.ResourceManifest 的路径解析一致：
         //    资源不打进 lime 资源库时以仓库/部署目录里的文件为准）。
@@ -124,12 +130,18 @@ class AudioClip extends UnityObject {
         try {
             buffer = AudioBuffer.fromBytes(bytes);
         } catch (e:Dynamic) {
-            Debug.LogWarning('音频解码失败：$soundKey（$e）');
+            WarnOnce('decode/$key', '音频解码失败：$soundKey（$e）');
             return null;
         }
-        if (buffer == null)
+        if (buffer == null) {
+            WarnOnce('buffer/$key', '音频解码结果为 null（格式不支持）：$soundKey。');
             return null;
+        }
         var result = Sound.fromAudioBuffer(buffer);
+        if (result == null) {
+            WarnOnce('from-buffer/$key', 'Sound.fromAudioBuffer 返回 null，音频无法播放：$soundKey。');
+            return null;
+        }
         // PORT-NOTE: 清单里没有时长/采样率信息时（例如清单缺失、clip 由别处构造），
         // 用解码结果补齐 AudioClip 的元数据，保证 MusicManager 的 clip.length 可用。
         if (length <= 0 && result != null && result.length > 0)
@@ -144,13 +156,13 @@ class AudioClip extends UnityObject {
     private function readFileBytes():Bytes {
         var path = ResourceManifest.get().resolvePath(soundKey);
         if (path == null) {
-            Debug.LogWarning('找不到音频文件：$soundKey（assets 根：${ResourceManifest.get().assetsRoots.join(", ")}）');
+            WarnOnce('resolve/$key', '找不到音频文件：$soundKey（assets 根：${ResourceManifest.get().assetsRoots.join(", ")}）');
             return null;
         }
         try {
             return sys.io.File.getBytes(path);
         } catch (e:Dynamic) {
-            Debug.LogWarning('读取音频文件失败：$path（$e）');
+            WarnOnce('read/$key', '读取音频文件失败：$path（$e）');
             return null;
         }
     }
@@ -163,4 +175,21 @@ class AudioClip extends UnityObject {
             return Std.int(length * frequency);
         return 0;
     }
+
+    /** 诊断用名字：优先 lime 资源路径（audio_manifest.json 的 assetPath），其次资源名。 */
+    private var key(get, never):String;
+    function get_key():String {
+        if (soundKey != null)
+            return soundKey;
+        return name != null && name.length > 0 ? name : "<unnamed clip>";
+    }
+
+    /** 同一条失败原因只告警一次（播放失败会被反复重试，避免刷屏）。 */
+    private static function WarnOnce(key:String, message:String):Void {
+        if (warnedKeys.exists(key))
+            return;
+        warnedKeys.set(key, true);
+        Debug.LogWarning(message);
+    }
+    private static var warnedKeys:Map<String, Bool> = new Map();
 }

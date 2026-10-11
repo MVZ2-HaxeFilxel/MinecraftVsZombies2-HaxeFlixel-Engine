@@ -5,6 +5,7 @@ import mvz2.level.LevelManager.LevelDataIdentifierList;
 
 // PORT-NOTE: C# 的 [BsonIgnoreExtraElements] 特性在 Haxe 中无对应语义，保留为元数据。
 @:bsonIgnoreExtraElements
+@:rtti
 class SerializableLevelControllerHeader
 {
 	public var identifiers:LevelDataIdentifierList;

@@ -14,6 +14,7 @@ import pvzengine.definitions.StageDefinition;
 import pvzengine.entities.Entity;
 import pvzengine.level.LevelEngine;
 import unity.Vector3;
+import unity.UnityObject;
 
 @:autoStageDefinition(VanillaStageNames.breakout)
 class BreakoutStage extends StageDefinition
@@ -49,7 +50,7 @@ class BreakoutStage extends StageDefinition
     {
         super.OnUpdate(level);
         var board = level.FindFirstEntity(VanillaEffectID.breakoutBoard);
-        if (board == null || !board.Exists())
+        if (board == null || !unity.UnityObject.exists(board))
         {
             board = SpawnBoard(level);
         }

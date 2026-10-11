@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Effects/Chapter2/HealParticles.cs
 package mvz2.gamecontent.effects;
 
+import unity.UnityObject;
 import mvz2.vanilla.entities.VanillaEntityExt;
 import mvz2.vanilla.properties.VanillaEntityPropertyMeta;
 import pvzengine.entities.Entity;
@@ -19,7 +20,7 @@ class HealParticles extends EffectBehaviour
     {
         super.Update(entity);
         var parent = entity.Parent;
-        if (parent != null && parent.Exists())
+        if (parent != null && unity.UnityObject.exists(parent))
         {
             entity.Timeout = entity.GetMaxTimeout();
             entity.Position = parent.Position;

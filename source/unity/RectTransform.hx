@@ -1,12 +1,9 @@
 package unity;
 
 // Minimal UnityEngine.RectTransform shim.
+// PORT-NOTE: 字段（anchoredPosition/sizeDelta/anchorMin/anchorMax/pivot）已上移到
+// Transform（见 Transform.hx 的 PORT-NOTE），本类仅保留 RectTransform 专属 API 与类型身份。
 class RectTransform extends Transform {
-    public var anchoredPosition:Vector2 = new Vector2(0, 0);
-    public var sizeDelta:Vector2 = new Vector2(0, 0);
-    public var anchorMin:Vector2 = new Vector2(0.5, 0.5);
-    public var anchorMax:Vector2 = new Vector2(0.5, 0.5);
-    public var pivot:Vector2 = new Vector2(0.5, 0.5);
     // Unity 的 RectTransform.rect（local 空间、原点在 pivot 的矩形）；由 sizeDelta/pivot 推出。
     public var rect(get, never):Rect;
     function get_rect():Rect {

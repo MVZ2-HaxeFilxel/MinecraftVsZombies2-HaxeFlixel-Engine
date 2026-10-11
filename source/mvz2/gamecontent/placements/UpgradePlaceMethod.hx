@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Placements/PlaceMethods/UpgradePlaceMethod.cs
 package mvz2.gamecontent.placements;
 
+import unity.UnityObject;
 import mvz2.gamecontent.buffs.contraptions.ImitatedBuff;
 import mvz2.vanilla.contraptions.VanillaContraptionExt;
 import mvz2.vanilla.grids.VanillaGridStatus;
@@ -37,7 +38,7 @@ class UpgradePlaceMethod extends PlaceMethod implements IEntityTwinklePlaceMetho
     public override function PlaceEntity(placement:PlacementDefinition, grid:LawnGrid, entityDef:EntityDefinition, param:PlaceParams):PlaceOutput
     {
         var entity = Lambda.find(grid.GetEntities(), e -> VanillaContraptionExt.CanUpgradeToContraption(e, entityDef));
-        if (entity != null && entity.Exists())
+        if (entity != null && unity.UnityObject.exists(entity))
         {
             var isCommandBlock = LogicPlaceProps.IsCommandBlock(param);
             var ent = VanillaContraptionExt.UpgradeToContraption(entity, entityDef.GetID(), []);

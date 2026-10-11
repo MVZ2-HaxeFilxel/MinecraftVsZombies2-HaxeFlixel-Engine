@@ -23,6 +23,7 @@ class ImageElement extends GraphicElement
 	private var _image:Null<unity.ui.Image>;
 }
 
+@:rtti
 class SerializableImageElement extends SerializableGraphicElement
 {
 	public function new()

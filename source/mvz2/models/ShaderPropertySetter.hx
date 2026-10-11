@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/MVZ2/Models/Components/ShaderPropertySetters/ShaderPropertySetter.cs
 package mvz2.models;
 
+import unity.UnityObject;
 import tools.ObjectExtensions;
 
 // [RequireComponent(typeof(RendererElement))]
@@ -48,7 +49,7 @@ class ShaderPropertySetter<T> extends ModelComponent {
     }
     public var Element(get, never):RendererElement;
     function get_Element():RendererElement {
-        if (!element.Exists()) {
+        if (!unity.UnityObject.exists(element)) {
             element = GetComponent(RendererElement);
         }
         return element;

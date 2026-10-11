@@ -7,6 +7,7 @@ import tools.ObjectExtensions;
 import unity.Mathf;
 import unity.Sprite;
 import unity.SpriteRenderer;
+import unity.UnityObject;
 
 // [ExecuteAlways]
 // [RequireComponent(typeof(SpriteRenderer))]
@@ -45,7 +46,7 @@ class AnimationSpriteSetter extends ModelComponent {
     }
     private var Renderer(get, never):SpriteRenderer;
     function get_Renderer():SpriteRenderer {
-        if (!sprRenderer.Exists()) {
+        if (!unity.UnityObject.exists(sprRenderer)) {
             sprRenderer = GetComponent(SpriteRenderer);
         }
         return sprRenderer;

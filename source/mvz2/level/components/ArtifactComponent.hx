@@ -180,6 +180,7 @@ class ArtifactComponent extends MVZ2Component implements IArtifactComponent
 	}
 }
 
+@:rtti
 class SerializableArtifactComponent implements ISerializableLevelComponent
 {
 	public var artifacts:SerializableArtifactList;

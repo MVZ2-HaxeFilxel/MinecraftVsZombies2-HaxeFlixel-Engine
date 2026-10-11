@@ -152,6 +152,7 @@ class RendererElement extends GraphicElement
 	private var _renderer:Null<Renderer>;
 }
 
+@:rtti
 class SerializableRendererElement extends SerializableGraphicElement
 {
 	public var floatProperties:Map<String, Float>;

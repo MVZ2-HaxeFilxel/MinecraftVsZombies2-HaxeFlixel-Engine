@@ -63,33 +63,20 @@ class Model extends unity.MonoBehaviour
 	public function InitModel():Void
 	{
 		modelComponents.resize(0);
-		BootTrace.step('Model.InitModel 收集组件开始 @' + gameObject.name);
-		// Haxe/cpp 对接口 Class 的运行时反射不稳定：用所有模型组件的共同基类查询，
-		// 避免返回只有接口壳、没有可调用 vtable 的对象。
 		var discovered:Array<ModelComponent> = GetComponentsInChildren(ModelComponent, true);
-		BootTrace.step('Model.InitModel 收集组件完成 @' + gameObject.name + ' 数量=' + discovered.length);
 		for (comp in discovered)
 		{
 			modelComponents.push(comp);
 		}
-		var index = 0;
 		for (comp in modelComponents)
 		{
 			if (comp == null)
 				continue;
 			var modelComp:ModelComponent = cast comp;
-			var compName = Type.getClassName(Type.getClass(modelComp));
-			if (compName == null) compName = 'ModelComponent';
-			BootTrace.step('Model.InitModel SetModel 开始 @' + gameObject.name + ' #' + index + ' ' + compName);
 			modelComp.SetModel(this);
-			BootTrace.step('Model.InitModel Init 开始 @' + gameObject.name + ' #' + index + ' ' + compName);
-			// ModelComponent.Init 的接口虚表在 hxcpp 下对部分 prefab 动态组件不稳定；
-			// 这些组件的运行时逻辑由 UpdateFrame/UpdateLogic 驱动，先完成安全绑定。
-			BootTrace.step('Model.InitModel Init 跳过 @' + gameObject.name + ' #' + index + ' ' + compName);
-			index++;
+			modelComp.Init();
 		}
 		modelInterface = new ModelParentInterface(this);
-		BootTrace.step('Model.InitModel 完成 @' + gameObject.name + ' 组件=' + modelComponents.length);
 	}
 	public function UpdateFixed():Void
 	{
@@ -548,6 +535,7 @@ class Model extends unity.MonoBehaviour
 	// #endregion
 }
 
+@:rtti
 class SerializableModelData
 {
 	public var anchor:Null<String>;
@@ -564,6 +552,7 @@ class SerializableModelData
 	public function new() {}
 }
 
+@:rtti
 class SerializableAnimator
 {
 	public var playingDatas:Array<SerializableAnimatorPlayingData>;
@@ -717,6 +706,7 @@ class SerializableAnimator
 	}
 }
 
+@:rtti
 class SerializableAnimatorPlayingData
 {
 	public var currentHash:Int;

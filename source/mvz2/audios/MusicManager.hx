@@ -14,6 +14,7 @@ import unity.MonoBehaviour;
 import Main;
 import mvz2.managers.ResourceManager;
 import unity.Time;
+import unity.UnityObject;
 
 // Ported from: Assets/Scripts/MVZ2/Audios/MusicManager.cs
 class MusicManager extends MonoBehaviour implements IGlobalMusic {
@@ -45,7 +46,7 @@ class MusicManager extends MonoBehaviour implements IGlobalMusic {
         Time = 0;
     }
     private function SetSourceClip(source:AudioSource, clip:AudioClip):Void {
-        // PORT-NOTE: C# `clip.Exists()` extension → null check.
+        // PORT-NOTE: C# `unity.UnityObject.exists(clip)` extension → null check.
         var clipValid = clip != null;
         source.clip = clip;
         source.gameObject.SetActive(clipValid);

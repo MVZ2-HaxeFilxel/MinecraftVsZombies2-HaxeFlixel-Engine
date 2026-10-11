@@ -7,6 +7,7 @@ import pvzengine.auras.SerializableAuraEffect;
 import tools.SerializableRNG;
 
 // [Serializable]
+@:rtti
 class SerializableArtifact
 {
 	public function new() {}

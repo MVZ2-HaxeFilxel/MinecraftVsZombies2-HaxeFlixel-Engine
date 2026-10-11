@@ -15,13 +15,14 @@ import pvzengine.entities.EngineEntityExt;
 import pvzengine.entities.EntityDefinition;
 import unity.Bounds;
 import unity.Vector3;
+import unity.UnityObject;
 
 class Detector
 {
     public function DetectExists(self:DetectionParams):Bool
     {
         var collider = Detect(self);
-        if (collider == null || collider.Entity == null || !collider.Entity.Exists())
+        if (collider == null || collider.Entity == null || !unity.UnityObject.exists(collider.Entity))
             return false;
         return true;
     }

@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Buffs/Enemies/Chapter1/StunBuff.cs
 package mvz2.gamecontent.buffs.enemies;
 
+import unity.UnityObject;
 import mvz2.gamecontent.buffs.VanillaBuffNames;
 import mvz2.gamecontent.effects.StunStars;
 import mvz2.gamecontent.effects.VanillaEffectID;
@@ -31,7 +32,7 @@ class StunBuff extends BuffDefinition
         super.PostRemove(buff);
         var starsID = GetStunStars(buff);
         var stars = starsID == null ? null : starsID.GetEntity(buff.Level);
-        if (stars != null && stars.Exists())
+        if (stars != null && unity.UnityObject.exists(stars))
         {
             stars.Remove();
         }
@@ -57,7 +58,7 @@ class StunBuff extends BuffDefinition
             return;
         }
         var entity = buff.GetEntity();
-        if (entity == null || !entity.Exists() || entity.IsDead)
+        if (entity == null || !unity.UnityObject.exists(entity) || entity.IsDead)
         {
             buff.Remove();
             return;
@@ -70,7 +71,7 @@ class StunBuff extends BuffDefinition
             return;
         var starsID = GetStunStars(buff);
         var stars = starsID == null ? null : starsID.GetEntity(entity.Level);
-        if (stars == null || !stars.Exists())
+        if (stars == null || !unity.UnityObject.exists(stars))
         {
             // C#: buff.Level.Spawn(...)?.Let(e => { e.SetParent(entity); SetStunStars(...); });
             var spawned = buff.Level.Spawn(VanillaEffectID.stunStars, StunStars.GetPosition(entity), entity);

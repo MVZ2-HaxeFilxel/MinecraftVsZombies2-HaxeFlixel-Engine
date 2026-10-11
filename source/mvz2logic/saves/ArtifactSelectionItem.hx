@@ -4,6 +4,7 @@ package mvz2logic.saves;
 import pvzengine.NamespaceID;
 
 // [Serializable]
+@:rtti
 class ArtifactSelectionItem
 {
 	public var id:NamespaceID;

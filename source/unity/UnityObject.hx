@@ -7,7 +7,7 @@ class UnityObject {
 
     public function new() {}
 
-    // C# 的 Tools 扩展方法 `obj.Exists()` 在 Haxe 中无法在 null 上调用，
+    // C# 的 Tools 扩展方法 `unity.UnityObject.exists(obj)` 在 Haxe 中无法在 null 上调用，
     // 因此调用点写 `UnityObject.exists(obj)`。
     public static function exists(obj:Dynamic):Bool {
         if (obj == null) return false;
@@ -96,6 +96,11 @@ class UnityObject {
         if (Std.isOfType(original, GameObject)) {
             var cloned = cloneSubtree(cast original);
             attachClone(cloned.root, position, rotation, parent);
+            // PORT-NOTE: 对齐 Unity 的 Instantiate 语义 —— 实例化后对克隆树的全部组件派发
+            // Awake（Unity 引擎在实例化时就会调）。移植层原先只建树不派发，于是一切
+            // 「Awake 里创建字段、Init 里使用」的模式（EntityController.hpBarSource、
+            // GridController.hpBarSource…）全部拿到 null，关卡实体一生成就空引用段错误。
+            awakenCloneTree(cloned.root);
             return cast cloned.root;
         }
         if (Std.isOfType(original, Component)) {
@@ -104,6 +109,7 @@ class UnityObject {
                 return original;
             var cloned = cloneSubtree(template.gameObject);
             attachClone(cloned.root, position, rotation, parent);
+            awakenCloneTree(cloned.root);
             var mapped = cloned.map.get(cast template);
             return mapped != null ? cast mapped : cast original;
         }
@@ -186,6 +192,33 @@ class UnityObject {
         for (child in go.transform.children) {
             if (child != null && child.gameObject != null)
                 collectNodes(child.gameObject, out);
+        }
+    }
+
+    /** 对克隆树的全部组件派发 Awake（Unity Instantiate 语义；逐个 try/catch 隔离）。 */
+    private static function awakenCloneTree(root:GameObject):Void {
+        if (root == null)
+            return;
+        for (comp in root.GetAllComponents())
+            dispatchLifecycle(comp, "Awake");
+        var tr = root.transform;
+        if (tr == null)
+            return;
+        for (child in tr.children.copy()) {
+            if (child != null && child.gameObject != null)
+                awakenCloneTree(child.gameObject);
+        }
+    }
+    private static function dispatchLifecycle(comp:Component, message:String):Void {
+        if (comp == null)
+            return;
+        var fn = Reflect.field(comp, message);
+        if (fn == null || !Reflect.isFunction(fn))
+            return;
+        try {
+            Reflect.callMethod(comp, fn, []);
+        } catch (e:Dynamic) {
+            Debug.LogWarning('[UnityObject] ${comp.name}.$message 派发出错：$e');
         }
     }
 

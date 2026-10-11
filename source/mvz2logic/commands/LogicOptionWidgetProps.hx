@@ -10,9 +10,9 @@ import pvzengine.PropertyMeta;
 @:propertyRegistryRegion(LogicPropertyRegions.optionWidget)
 class LogicOptionWidgetProps
 {
-	private static function Get<T>(name:String):PropertyMeta<T>
+	private static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
 	{
-		return new PropertyMeta<T>(name);
+		return new PropertyMeta<T>(name, defaultValue);
 	}
 
 	// #region 标签
@@ -32,16 +32,16 @@ class LogicOptionWidgetProps
 	// #endregion
 
 	// #region 滑动条
-	public static var SLIDER_WHOLE_NUMBERS:PropertyMeta<Bool> = Get("slider_whole_numbers");
+	public static var SLIDER_WHOLE_NUMBERS:PropertyMeta<Bool> = Get("slider_whole_numbers", false);
 	public static function IsSliderWholeNumbers(def:OptionWidgetDefinition):Bool return def.GetProperty(SLIDER_WHOLE_NUMBERS);
-	public static var SLIDER_MIN_VALUE:PropertyMeta<Float> = Get("slider_min_value");
+	public static var SLIDER_MIN_VALUE:PropertyMeta<Float> = Get("slider_min_value", 0.0);
 	public static function GetSliderMinValue(def:OptionWidgetDefinition):Float return def.GetProperty(SLIDER_MIN_VALUE);
-	public static var SLIDER_MAX_VALUE:PropertyMeta<Float> = Get("slider_max_value");
+	public static var SLIDER_MAX_VALUE:PropertyMeta<Float> = Get("slider_max_value", 0.0);
 	public static function GetSliderMaxValue(def:OptionWidgetDefinition):Float return def.GetProperty(SLIDER_MAX_VALUE);
 	// #endregion
 
 	// #region 工具提示
-	public static var ORDER:PropertyMeta<Int> = Get("order");
+	public static var ORDER:PropertyMeta<Int> = Get("order", 0);
 	public static function GetOrder(def:OptionWidgetDefinition):Int return def.GetProperty(ORDER);
 	// #endregion
 

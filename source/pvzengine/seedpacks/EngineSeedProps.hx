@@ -12,16 +12,16 @@ import pvzengine.PropertyRegions;
 @:propertyRegistryRegion(PropertyRegions.seed)
 class EngineSeedProps
 {
-	private static function Get<T>(name:String):PropertyMeta<T>
+	private static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
 	{
-		return new PropertyMeta<T>(name);
+		return new PropertyMeta<T>(name, defaultValue);
 	}
 	public static var RECHARGE_ID:PropertyMeta<NamespaceID> = Get("rechargeId");
-	public static var COST:PropertyMeta<Float> = Get("cost");
+	public static var COST:PropertyMeta<Float> = Get("cost", 0.0);
 
-	public static var RECHARGE_SPEED:PropertyMeta<Float> = Get("rechargeSpeed");
-	public static var RECHARGE:PropertyMeta<Float> = Get("recharge");
-	public static var IS_START_RECHARGE:PropertyMeta<Bool> = Get("isStartRecharge");
+	public static var RECHARGE_SPEED:PropertyMeta<Float> = Get("rechargeSpeed", 0.0);
+	public static var RECHARGE:PropertyMeta<Float> = Get("recharge", 0.0);
+	public static var IS_START_RECHARGE:PropertyMeta<Bool> = Get("isStartRecharge", false);
 	public static var DISABLE_ID:PropertyMeta<NamespaceID> = Get("disableID");
 	public static function GetRechargeSpeed(seed:SeedPack):Float
 	{

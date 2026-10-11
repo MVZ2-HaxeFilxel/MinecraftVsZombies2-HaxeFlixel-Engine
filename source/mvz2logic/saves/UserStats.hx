@@ -165,6 +165,7 @@ class UserStats
 
 // [Serializable]
 // [BsonIgnoreExtraElements]
+@:rtti
 class SerializableUserStats
 {
 	public function new() {}

@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Enemies/Chapter2/Ghast.cs
 package mvz2.gamecontent.enemies;
 
+import unity.UnityObject;
 import mvz2.gamecontent.buffs.enemies.FlyBuff;
 import mvz2.gamecontent.buffs.projectiles.GhastFireChargeBuff;
 import mvz2.gamecontent.detections.DispenserDetector;
@@ -60,7 +61,7 @@ class Ghast extends AIEntityBehaviour
                         if (shootTimer.Expired)
                         {
                             var target = FindTarget(enemy);
-                            if (target != null && target.Exists())
+                            if (target != null && unity.UnityObject.exists(target))
                             {
                                 enemy.Target = target;
                                 shootTimer.ResetTime(SHOOT_DURATION);
@@ -75,7 +76,7 @@ class Ghast extends AIEntityBehaviour
                         if (shootTimer.Expired)
                         {
                             var target = FindTarget(enemy);
-                            if (target != null && target.Exists())
+                            if (target != null && unity.UnityObject.exists(target))
                             {
                                 Fire(enemy, target);
                             }

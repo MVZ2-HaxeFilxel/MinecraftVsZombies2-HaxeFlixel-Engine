@@ -236,6 +236,7 @@ class ModifiableProperties
 }
 
 // Ported from: Assets/Scripts/Engine/Level/Properties/ModifiableProperties.cs (class SerializableModifiableProperties)
+@:rtti
 class SerializableModifiableProperties
 {
 	public function new() {}

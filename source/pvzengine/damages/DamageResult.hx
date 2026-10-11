@@ -104,6 +104,7 @@ class DamageResult
 
 // [Serializable]
 // C# 为 abstract class
+@:rtti
 class SerializableDamageResult
 {
     public function new(result:DamageResult)

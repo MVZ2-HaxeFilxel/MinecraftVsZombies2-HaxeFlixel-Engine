@@ -2,6 +2,7 @@
 package mvz2logic.saves;
 
 // [Serializable]
+@:rtti
 class BlueprintSelection
 {
 	public var blueprints:Array<BlueprintChooseSaveItem>;

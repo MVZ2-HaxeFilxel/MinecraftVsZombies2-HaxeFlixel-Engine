@@ -34,6 +34,7 @@ class UserStatEntry
 }
 
 // [Serializable]
+@:rtti
 class SerializableUserStatEntry
 {
 	public function new() {}

@@ -27,6 +27,7 @@ class ArmorDamageResult extends DamageResult
 }
 
 // [Serializable]
+@:rtti
 class SerializableArmorDamageResult extends SerializableDamageResult
 {
     public function new(result:ArmorDamageResult)

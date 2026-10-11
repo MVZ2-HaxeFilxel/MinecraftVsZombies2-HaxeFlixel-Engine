@@ -23,6 +23,7 @@ import tools.Ref;
 import unity.Bounds;
 import unity.Mathf;
 import unity.Vector3;
+import unity.UnityObject;
 import mvz2logic.callbacks.LogicCallbacks.PostPointerActionParams;
 import mvz2.gamecontent.effects.VanillaEffectID.VanillaEffectNames;
 using mvz2logic.entities.LogicEntityExt;
@@ -55,7 +56,7 @@ class BreakoutBoard extends EffectBehaviour
 
         var pearlExists = true;
         var target = entity.Target;
-        if (target != null && target.Exists())
+        if (target != null && unity.UnityObject.exists(target))
         {
             var targetPosition = entity.Position + Vector3.right * 40;
             if (target.State == STATE_RETURN)
@@ -167,7 +168,7 @@ class BreakoutBoard extends EffectBehaviour
     public static function FirePearl(board:Entity):Void
     {
         var pearl = board.Target;
-        if (pearl != null && pearl.Exists())
+        if (pearl != null && unity.UnityObject.exists(pearl))
         {
             board.Target = null;
             pearl.SetParent(null);

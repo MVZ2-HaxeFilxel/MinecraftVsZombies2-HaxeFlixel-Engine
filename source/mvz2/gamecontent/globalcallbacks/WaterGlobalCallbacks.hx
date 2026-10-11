@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/GlobalCallbacks/WaterGlobalCallbacks.cs
 package mvz2.gamecontent.globalcallbacks;
 
+import unity.UnityObject;
 import mvz2.gamecontent.buffs.entities.InWaterBuff;
 import mvz2.vanilla.audios.VanillaSoundID;
 import mvz2.vanilla.callbacks.VanillaLevelCallbacks;
@@ -75,7 +76,7 @@ class WaterGlobalCallbacks extends VanillaGlobalCallbacks
                 {
                     VanillaEntityExt.RemoveDie(entity);
                 }
-                if (entity.Exists())
+                if (unity.UnityObject.exists(entity))
                 {
                     entity.Remove();
                 }

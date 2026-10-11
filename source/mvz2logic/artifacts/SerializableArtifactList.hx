@@ -2,6 +2,7 @@
 package mvz2logic.artifacts;
 
 // [Serializable]
+@:rtti
 class SerializableArtifactList
 {
 	public function new() {}

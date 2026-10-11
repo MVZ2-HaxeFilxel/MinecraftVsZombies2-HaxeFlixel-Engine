@@ -10,6 +10,7 @@ import mvz2.sprites.SpriteFrameFactory;
 import mvz2.sprites.SpriteManifestData;
 import mvz2.sprites.SpriteManifestLoader;
 import unity.Canvas;
+import unity.Canvas.RenderMode;
 import unity.CanvasGroup;
 import unity.Collider2D;
 import unity.Component;
@@ -29,6 +30,7 @@ import unity.ui.CanvasScaler.ScaleMode;
 import unity.ui.CanvasScaler.ScreenMatchMode;
 import unity.ui.HorizontalOrVerticalLayoutGroup.AspectMode;
 import unity.ui.HorizontalOrVerticalLayoutGroup.AspectRatioFitter;
+import unity.ui.LayoutRebuilder;
 import unity.ui.Button;
 import unity.ui.Graphic;
 import unity.ui.Image;
@@ -69,7 +71,12 @@ import unity.tmpro.TextMeshProUGUI;
 //     这些节点的子级矩形取自 prefab 里**已序列化的** anchoredPosition/sizeDelta（Unity 运行时
 //     会再算一遍，移植层直接用导出值）。因此动态增删的列表项（ElementListUI.CreateItem）位置
 //     可能与 Unity 不同。TODO-PORT。
-//   * Mask/RectMask2D 用 FlxSprite.clipRect 做矩形裁剪，不做模板缓冲。
+//   * Mask/RectMask2D 用 FlxSprite.clipRect 做矩形裁剪，不做模板缓冲。`clipRect` 是**帧本地**
+//     坐标且会被 flixel 取整（`set_clipRect` 里 `rect.round()`），因此纯色块兜底（1×1 白图拉伸到
+//     矩形）上的遮罩边界最粗时会有约一个「帧像素 × 缩放」的误差 —— TODO-PORT。
+//   * 世界空间 TMP 的 `enableAutoSizing` 只做「钳到 [fontSizeMin, fontSizeMax] + 不超过节点 rect
+//     高度」，没有 TMP 的文本度量与二分 —— TODO-PORT。
+//   * Mask 裁剪的换算按 |scale| 做，未处理 `flipX/flipY`（翻转帧上裁剪会跟着镜像）。TODO-PORT。
 class UiRenderer extends FlxGroup {
 	/** 全进程唯一实例（install() 建立）。 */
 	public static var instance(default, null):UiRenderer = null;
@@ -256,16 +263,26 @@ class UiRenderer extends FlxGroup {
 		for (root in roots) {
 			if (root == null)
 				continue;
+			// MVZ2-DEBUG-LAYOUT
+			// PORT-NOTE: 布局引擎（unity.ui.LayoutRebuilder）必须在遍历**之前**跑：
+			// 受 LayoutGroup/ContentSizeFitter 控制的节点，其 anchoredPosition/sizeDelta 在
+			// prefab 里是序列化残留（常为 0），由本调用在运行期算出并写回 RectTransform，
+			// 下面的 walk 再按新值解析屏幕矩形（与 Unity「布局先行、渲染在后」同序）。
+			LayoutRebuilder.rebuild(root);
 			var canvas = findCanvas(root);
 			if (canvas != null) {
 				walkCanvas(canvas, root);
 			} else {
 				// PORT-NOTE: 没有 Canvas 时仍按"画布 = 整个屏幕"处理，让手工构造的对象图
 				// （`MainGameScene.buildDialog` 等只 `new Image()`、没挂 Canvas 的 UI）也能画出来。
-				// 此时 scaleFactor 取最近的 CanvasScaler（找不到则 1）。
-				var scaler = findCanvasScaler(root);
-				var scale = scaler != null ? computeScaleFactor(scaler) : 1;
-				walk(root, screenFrame(scale), revisionChanged);
+				// 此时 scaleFactor **沿父链向上找最近的 CanvasScaler 继承**（Unity 语义：嵌套 Canvas
+				// 不重置缩放），父链确实没有（如手工建在 `MainGame/MainScene/UI` 下的对话框树 ——
+				// 该 "UI" 节点是 GlobalUICanvas 的替身但没挂 Canvas/CanvasScaler）才落 1。
+				// TODO-PORT: 若后续给该节点补上 Canvas+CanvasScaler（或整棵树改由 prefab 数据重建），
+				// 这里会自动取到 GlobalUICanvas 的 1.6，无需再改本文件。
+				// PORT-NOTE: overlayRank=1 —— 这些无画布的手工 UI（对话框一类）语义上是
+				// ScreenSpaceOverlay，须排在世界空间画布之上（见 UiEntry.overlayRank）。
+				walk(root, screenFrame(inheritedCanvasScale(root.transform)), revisionChanged, 1);
 			}
 		}
 		applyOrder();
@@ -304,6 +321,16 @@ class UiRenderer extends FlxGroup {
 		// 不排序会盖住背景。
 		if (spriteRendererCount > 1)
 			stableSortWorldSprites();
+		// PORT-NOTE: Canvas 分层（Unity：ScreenSpaceOverlay 永远画在世界空间画布之上，与层级顺序无关）。
+		// 本组按 overlayRank 稳定分区：0（世界空间/无画布）在前、1（Overlay）在后，
+		// 组内保持上面的层级顺序与排序层结果。不分区时，挂在 Overlay 画布下的对话框
+		// （MainGame/MainScene/UI/Dialogs/*）会被后遍历的世界空间 Mainmenu 盖住。
+		var overlayCount = 0;
+		for (e in live)
+			if (e.overlayRank > 0)
+				overlayCount++;
+		if (overlayCount > 0 && overlayCount < live.length)
+			stablePartitionByOverlayRank();
 		var n = live.length;
 		if (members.length != n)
 			members.resize(n);
@@ -325,8 +352,7 @@ class UiRenderer extends FlxGroup {
 	}
 
 	/** 对 live 里的 SpriteRenderer 项按 (sortingLayerID, sortingOrder) 排序。 */
-	private function stableSortWorldSprites():Void {
-		var indices:Array<Int> = [];
+	private function stableSortWorldSprites():Void {		var indices:Array<Int> = [];
 		for (i in 0...live.length) {
 			if (live[i].kind == UiEntryKind.WorldSprite)
 				indices.push(i);
@@ -359,6 +385,25 @@ class UiRenderer extends FlxGroup {
 		});
 		for (k in 0...indices.length)
 			live[indices[k]] = keys[k].entry;
+	}
+
+	/**
+	 * 按 overlayRank 稳定分区：rank 0（世界空间）在前、rank 1（ScreenSpaceOverlay）在后。
+	 *
+	 * PORT-NOTE: Haxe 的 Array.sort 不保证稳定，这里同样用 (rank, 原下标) 键排序，
+	 * 同组内保持遍历（层级）顺序 —— 与 stableSortWorldSprites 同一手法。
+	 */
+	private function stablePartitionByOverlayRank():Void {
+		var keys:Array<{rank:Int, index:Int, entry:UiEntry}> = [];
+		for (i in 0...live.length)
+			keys.push({rank: live[i].overlayRank, index: i, entry: live[i]});
+		keys.sort(function(a, b) {
+			if (a.rank != b.rank)
+				return a.rank < b.rank ? -1 : 1;
+			return a.index - b.index;
+		});
+		for (k in 0...live.length)
+			live[k] = keys[k].entry;
 	}
 
 	private function reap():Void {
@@ -585,8 +630,22 @@ class UiRenderer extends FlxGroup {
 	 * PORT-NOTE: 移植层没有做「localPosition → position」的层级级联（`ScenePrefabLoader` 只写
 	 * `localPosition`，`Transform.position` 保持默认值），因此这里按 Unity 的语义**就地累加**：
 	 * 从根往下逐级 `world = parentWorld + parentScale * local`。父级缩放取 `localScale` 级联值。
-	 * 这与 `updateSpriteRenderer` 直接用 `tr.position` 的做法不同——后者对 prefab 加载的节点
-	 * 拿到的是未级联的 (0,0,0)。TODO-PORT: 级联应由 Transform 层统一提供（属另一工作包）。
+	 *
+	 * PORT-NOTE: 但 `position` **不是恒为 0** —— 游戏逻辑里有 70+ 处直接写它的**世界坐标**
+	 *（`MapController` 平移地图相机、`EntityController`/`ModelGroup` 摆实体与模型子节点、
+	 * `LevelBlueprintChooseController`/`HintArrow`/`HPBarCanvasController` 摆 UI、…），
+	 * 而 prefab 加载只写 `localPosition`。两类节点都要照顾，因此本函数的规则是：
+	 * **每个节点自身若 `position` 非零就以它为准（代码写过的世界坐标，不再叠加父级），
+	 * 否则取「父级解析值 + parentScale * localPosition」**。
+	 * 纯 prefab 节点（`position` 恒为 0）与逐级累加完全一致；被代码摆过的节点保持原样，
+	 * 且它的子节点（有 localPosition）从它继续级联（例如实体 → 模型子节点）。
+	 *
+	 * PORT-NOTE: RectTransform 节点的特例：导出器把 RectTransform 的 `m_LocalPosition` 导成了
+	 * (0,0,0)，真实位置存在 `anchoredPosition` 里（Mainmenu 的 Stats/Achievements 世界画布
+	 * 与 Elements/Labels 下的世界文本就是这一类 —— 不用 anchoredPosition 它们会全部叠到
+	 * 屏幕中心）。因此对「position 与 localPosition 都是 0、但 anchoredPosition 非 0」的
+	 * RectTransform 节点，用 anchoredPosition 当局部偏移。
+	 * TODO-PORT: 级联应由 Transform 层统一提供（属另一工作包）。
 	 */
 	private function worldPositionOf(tr:Transform):Vector3 {
 		var chain:Array<Transform> = [];
@@ -600,13 +659,28 @@ class UiRenderer extends FlxGroup {
 		var scale = new Vector3(1, 1, 1);
 		var i = chain.length - 1;
 		while (i >= 0) {
-			var local = chain[i].localPosition;
-			if (local != null) {
-				position.x += local.x * scale.x;
-				position.y += local.y * scale.y;
-				position.z += local.z * scale.z;
+			var node = chain[i];
+			var direct = node.position;
+			if (direct != null && (direct.x != 0 || direct.y != 0 || direct.z != 0)) {
+				position.x = direct.x;
+				position.y = direct.y;
+				position.z = direct.z;
+			} else {
+				var local = node.localPosition;
+				// RectTransform 特例：导出数据里 localPosition 恒为 0、真实位置在 anchoredPosition。
+				if ((local == null || (local.x == 0 && local.y == 0 && local.z == 0))
+					&& isInstanceOf(node, RectTransform)) {
+					var anchored = (cast node : RectTransform).anchoredPosition;
+					if (anchored != null && (anchored.x != 0 || anchored.y != 0))
+						local = new Vector3(anchored.x, anchored.y, 0);
+				}
+				if (local != null) {
+					position.x += local.x * scale.x;
+					position.y += local.y * scale.y;
+					position.z += local.z * scale.z;
+				}
 			}
-			var localScale = chain[i].localScale;
+			var localScale = node.localScale;
 			if (localScale != null) {
 				scale.x *= localScale.x;
 				scale.y *= localScale.y;
@@ -893,6 +967,18 @@ class UiRenderer extends FlxGroup {
 		return null;
 	}
 
+	/**
+	 * 沿父链向上找最近的、带 `CanvasScaler` 的祖先 Canvas 的 scaleFactor（找不到 → 1）。
+	 *
+	 * PORT-NOTE: Unity 里嵌套 Canvas 若没有自己的 CanvasScaler，**继承**父画布的 scaleFactor
+	 * （不是重置为 1）。旧代码 `walkCanvas` 对这类画布直接 `computeScaleFactor(null)` = 1，
+	 * 挂在不带 CanvasScaler 的 Canvas 下的 UI 会整体缩小到 1/父缩放。这里统一沿父链查。
+	 */
+	private function inheritedCanvasScale(from:Transform):Float {
+		var scaler = findCanvasScaler(from != null ? from.gameObject : null);
+		return scaler != null ? computeScaleFactor(scaler) : 1;
+	}
+
 	/** 画布根：矩形 = 屏幕 / scaleFactor（Unity 的 ScreenSpaceOverlay 画布 rect），原点在画布中心。 */
 	private function screenFrame(scale:Float):LayoutFrame {
 		var w = FlxG.width / scale;
@@ -906,12 +992,45 @@ class UiRenderer extends FlxGroup {
 
 	private function walkCanvas(canvas:Canvas, searchRoot:GameObject):Void {
 		var scaler = canvas.gameObject != null ? canvas.gameObject.GetComponent(CanvasScaler) : null;
-		var scale = computeScaleFactor(scaler);
+		// PORT-NOTE: 嵌套 Canvas 自己没挂 CanvasScaler 时继承**父画布**的 scaleFactor（Unity 语义），
+		// 而不是重置为 1 —— 旧代码 `computeScaleFactor(null)` 会把这些子树整体缩成 1/父缩放。
+		var scale = scaler != null ? computeScaleFactor(scaler) : inheritedCanvasScale(canvas.transform);
 		canvas.scaleFactor = scale;
 		var frame = screenFrame(scale);
 		// PORT-NOTE: Canvas 自身也可能挂 Graphic（罕见），按同一规则生成渲染项。
-		renderNode(canvas.gameObject, frame, true);
-		walk(canvas.gameObject, frame, true);
+		// overlayRank=1：ScreenSpaceOverlay 画布整体排在世界空间画布之上（Unity 的 Canvas 分层语义，
+		// 见 UiEntry.overlayRank）——否则挂在 Overlay 画布下的对话框会被后遍历的世界空间画布盖住。
+		renderNode(canvas.gameObject, frame, true, 1);
+		walk(canvas.gameObject, frame, true, 1);
+	}
+
+	/**
+	 * 世界空间 Canvas（主菜单 Stats/Achievements 子页面就是这一类）：画布根按世界坐标
+	 * 摆放，Unity 靠 Animator 平移相机在页面间切换。这里按正交相机把画布根投影到屏幕，
+	 * 子级仍走 RectTransform 布局（画布单位 → 屏幕 经 frame.scale = ppu × lossyScale 换算）。
+	 * 若按 screenFrame 重挂根，两个本在屏幕外的页面会变成全屏黑场盖住主菜单。
+	 */
+	private function walkWorldCanvas(canvas:Canvas, go:GameObject, forceDirty:Bool):Void {
+		var tr = go.transform;
+		// PORT-NOTE: 必须用 `worldPositionOf` —— prefab 加载只写 `localPosition`（`position` 对这类
+		// 节点恒为 (0,0,0)，且不做级联），用它会让所有 WorldSpace 画布（主菜单 Stats/Achievements
+		// 等子页面）叠在屏幕中心。被代码写过 `position` 的画布由 worldPositionOf 原样采用。
+		var pos = tr != null ? worldPositionOf(tr) : new Vector3(0, 0, 0);
+		var ppu = orthographicPixelsPerUnit();
+		if (ppu <= 0)
+			ppu = 1;
+		var cam = cameraOrigin();
+		var originX = FlxG.width * 0.5 + (pos.x - cam.x) * ppu;
+		var originY = FlxG.height * 0.5 - (pos.y - cam.y) * ppu;
+		var rt = tr != null && isInstanceOf(tr, RectTransform) ? cast(tr, RectTransform) : null;
+		var w = rt != null ? rt.sizeDelta.x : FlxG.width;
+		var h = rt != null ? rt.sizeDelta.y : FlxG.height;
+		var ls = tr != null ? tr.lossyScale : new Vector3(1, 1, 1);
+		// 画布根 pivot (0.5, 0.5)：local rect 以原点为中心（与 screenFrame 同一约定）。
+		var frame = frameFor(ppu, ls.x, new Vector2(originX, originY), new unity.Rect(-w * 0.5, -h * 0.5, w, h));
+		// overlayRank=0：世界空间画布排在 ScreenSpaceOverlay 之下（见 UiEntry.overlayRank）。
+		renderNode(go, frame, forceDirty, 0);
+		walk(go, frame, forceDirty, 0);
 	}
 
 	/**
@@ -919,8 +1038,9 @@ class UiRenderer extends FlxGroup {
 	 *
 	 * @param parent   父节点的布局帧
 	 * @param forceDirty 全局 revision 变化时，全部项都重建（无法逐项定位是哪个字段变了）
+	 * @param overlayRank 画布分层权重（0=世界空间，1=ScreenSpaceOverlay），见 UiEntry.overlayRank
 	 */
-	private function walk(parent:GameObject, parentFrame:LayoutFrame, forceDirty:Bool):Void {
+	private function walk(parent:GameObject, parentFrame:LayoutFrame, forceDirty:Bool, overlayRank:Int = 0):Void {
 		if (parent == null)
 			return;
 		var parentTr = parent.transform;
@@ -944,11 +1064,14 @@ class UiRenderer extends FlxGroup {
 				}
 			}
 
-			renderNode(go, frame, forceDirty);
+			renderNode(go, frame, forceDirty, overlayRank);
 			// 子级：若自身带 Canvas，则它开启一个新的画布（自己的 CanvasScaler）。
 			var nested = go.GetComponent(Canvas);
 			if (nested != null) {
-				walkCanvas(nested, go);
+				if (nested.renderMode == RenderMode.WorldSpace)
+					walkWorldCanvas(nested, go, forceDirty);
+				else
+					walkCanvas(nested, go);
 				continue;
 			}
 			// PORT-NOTE: Mask / RectMask2D 只影响**子树**，不影响本节点自身；因此这里派生出
@@ -956,7 +1079,7 @@ class UiRenderer extends FlxGroup {
 			var childFrameForSubtree = frame;
 			if (go.GetComponent(Mask) != null)
 				childFrameForSubtree = withClip(frame, intersectClip(frame.clip, toScreenRect(frame)));
-			walk(go, childFrameForSubtree, forceDirty);
+			walk(go, childFrameForSubtree, forceDirty, overlayRank);
 		}
 	}
 
@@ -1028,7 +1151,11 @@ class UiRenderer extends FlxGroup {
 		// PORT-NOTE: 缩放取 x 分量（工程里的 RectTransform 缩放都是等比；PanZoomController 例外，
 		// 它在缩放时同时改 x/y，这里取 x 已足够）。
 		var local = new unity.Rect(-rt.pivot.x * sizeX, -rt.pivot.y * sizeY, sizeX, sizeY);
-		return frameFor(scale, rt.localScale.x, new Vector2(originX, originY), local, parentFrame.clip, scale);
+		// PORT-NOTE: `frameFor` 的 canvasScale 参数必须是**父级已累积**的缩放（= toScreen），
+		// ownScale 才是本节点自己的 localScale：下一级 `childFrame` 会再算一次
+		// `parent.canvasScale * parent.ownScale`，旧代码在这里传 `scale`（= toScreen * localScale）
+		// 使 localScale 被乘了两次（缩放平方）。
+		return frameFor(toScreen, rt.localScale.x, new Vector2(originX, originY), local, parentFrame.clip, scale);
 	}
 
 	/** 把节点局部矩形（原点在 pivot）换算成屏幕左上角矩形。 */
@@ -1045,7 +1172,7 @@ class UiRenderer extends FlxGroup {
 	// #region 渲染项
 
 	/** 为一个 GameObject 生成/更新渲染项。 */
-	private function renderNode(go:GameObject, frame:LayoutFrame, forceDirty:Bool):Void {
+	private function renderNode(go:GameObject, frame:LayoutFrame, forceDirty:Bool, overlayRank:Int = 0):Void {
 		if (go == null || go.destroyed || !go.activeInHierarchy)
 			return;
 		if (isInstanceOf(go.transform, RectTransform))
@@ -1056,6 +1183,7 @@ class UiRenderer extends FlxGroup {
 		registerHitCandidate(go);
 		var graphic:Graphic = null;
 		var text:TextMeshProUGUI = null;
+		var worldText:TextMeshProUGUI = null;
 		var uiText:unity.ui.Text = null;
 		var renderer:SpriteRenderer = null;
 		for (c in go.GetAllComponents()) {
@@ -1071,8 +1199,15 @@ class UiRenderer extends FlxGroup {
 			// 从根上消除遮蔽；这里保留全限定名作为二次保险（对**值位置**的遮蔽同样有效）。
 			if (graphic == null && isInstanceOf(c, Graphic))
 				graphic = cast c;
-			if (text == null && isInstanceOf(c, TextMeshProUGUI))
-				text = cast c;
+			// PORT-NOTE: unity.tmpro.TextMeshPro（世界空间）继承 TextMeshProUGUI，
+			// isInstanceOf 会把二者混为一谈。世界空间 TMP 没有 uGUI 布局帧，
+			// 必须走 updateWorldText 按正交相机投影，否则全部堆在屏幕左上角。
+			if (text == null && worldText == null && isInstanceOf(c, TextMeshProUGUI)) {
+				if (Type.getClass(c) == unity.tmpro.TextMeshPro)
+					worldText = cast c;
+				else
+					text = cast c;
+			}
 			if (uiText == null && isInstanceOf(c, unity.ui.Text))
 				uiText = cast c;
 			if (renderer == null && isInstanceOf(c, SpriteRenderer))
@@ -1081,14 +1216,22 @@ class UiRenderer extends FlxGroup {
 
 		// 裁剪：Mask / RectMask2D 会影响它**下面**的子树，本节点自身不受影响。
 		var clip = frame.clip;
+		// PORT-NOTE: `Mask.showMaskGraphic = false` 表示该遮罩「只负责裁剪、不绘制自身 Graphic」
+		//（Unity 语义；语言下拉框的 `Viewport` 就是这一种）。旧代码照画，遮罩自身的图元会盖住
+		// 被它裁剪的内容（下拉框条目被半透明底图挡住）。
+		var maskComp = go.GetComponent(Mask);
+		var maskSuppressGraphic = maskComp != null && !maskComp.showMaskGraphic;
 
-		if (graphic != null) {
+		if (graphic != null && !maskSuppressGraphic) {
 			graphicCount++;
 			var cls = Type.getClassName(Type.getClass(graphic));
 			graphicClassCounts.set(cls, (graphicClassCounts.exists(cls) ? graphicClassCounts.get(cls) : 0) + 1);
 			var rt = isInstanceOf(go.transform, RectTransform) ? cast(go.transform, RectTransform) : null;
 			if (rt != null) rectGraphicCount++;
-			if (rt == null) {
+			if (worldText != null) {
+				var entry = obtain(go, overlayRank);
+				updateWorldText(entry, go, worldText, alphaOf(go));
+			} else if (rt == null) {
 				// PORT-NOTE: uGUI 的 Graphic 必须挂在 RectTransform 上；挂在普通 Transform 上
 				// 说明是手工对象图没换 Transform（见 MainGameScene.childRect 的说明），跳过并计数。
 				skippedCount++;
@@ -1096,7 +1239,7 @@ class UiRenderer extends FlxGroup {
 					nonRectGraphicSamples.push('${nodePath(go)} [${Type.getClassName(Type.getClass(graphic))} tr=${Type.getClassName(Type.getClass(go.transform))}]');
 			} else {
 				var rect = toScreenRect(frame);
-				var entry = obtain(go);
+				var entry = obtain(go, overlayRank);
 				updateGraphic(entry, go, graphic, text, uiText, rect, frame, alphaOf(go), frame.clip);
 			}
 			// PORT-NOTE: Mask 的裁剪由 walk() 派生子级帧时处理（只影响子树，不影响本节点）。
@@ -1106,7 +1249,7 @@ class UiRenderer extends FlxGroup {
 			// 显示列表的所有者；这里按正交相机（orthographicSize / 世界坐标）把它换算到屏幕，
 			// 否则主菜单背景永远不可见。属跨包协作点，已在报告里标注。
 			spriteRendererCount++;
-			var entry = obtain(go);
+			var entry = obtain(go, overlayRank);
 			updateSpriteRenderer(entry, renderer, alphaOf(go));
 		} else {
 			skippedCount++;
@@ -1128,7 +1271,7 @@ class UiRenderer extends FlxGroup {
 		return alpha;
 	}
 
-	private function obtain(go:GameObject):UiEntry {
+	private function obtain(go:GameObject, overlayRank:Int = 0):UiEntry {
 		var entry = entries.get(go);
 		if (entry == null) {
 			entry = {
@@ -1143,7 +1286,8 @@ class UiRenderer extends FlxGroup {
 				lastFont: null,
 				retired: false,
 				lastSeenFrame: frame,
-				worldRenderer: null
+				worldRenderer: null,
+				overlayRank: overlayRank
 			};
 			entry.sprite.visible = false;
 			entries.set(go, entry);
@@ -1181,14 +1325,17 @@ class UiRenderer extends FlxGroup {
 		var tint = FlxColor.fromRGBFloat(color.r, color.g, color.b, 1);
 
 		if (text != null) {
-			updateText(entry, text.text, text.fontSize, tint, alpha, text.alignment, text.enableWordWrapping,
-				text.richText, rect, text.enabled);
+			// PORT-NOTE: 不能直接把 `text.alignment` 交给 flixelAlignment —— 导出数据里 TMP 的
+			// alignment 恒为 65535 哨兵，真正对齐在 horizontalAlignment/verticalAlignment
+			// （见 tmpAlignmentValue 的说明）。
+			updateText(entry, text.text, text.fontSize, tint, alpha, tmpAlignmentValue(text), text.enableWordWrapping,
+				text.richText, rect, text.enabled, clip);
 			return;
 		}
 		if (uiText != null) {
 			var wrap = uiText.horizontalOverflow == unity.HorizontalWrapMode.Wrap;
 			updateText(entry, uiText.text, uiText.fontSize, tint, alpha, uiText.alignment, wrap,
-				uiText.supportRichText, rect, uiText.enabled);
+				uiText.supportRichText, rect, uiText.enabled, clip);
 			return;
 		}
 
@@ -1246,7 +1393,6 @@ class UiRenderer extends FlxGroup {
 		s.visible = graphic.enabled && alpha > 0.001;
 		s.alpha = alpha;
 		s.color = tint;
-		s.clipRect = clipToFlx(clip);
 		if (entry.kind == UiEntryKind.SolidRect) {
 			// 纯色块：1x1 白图拉伸到矩形（与 Unity 的 Image 无 sprite 时画纯色矩形一致）。
 			s.origin.set(0, 0);
@@ -1258,6 +1404,10 @@ class UiRenderer extends FlxGroup {
 			if (s.frameWidth > 0 && s.frameHeight > 0)
 				s.setGraphicSize(Std.int(Math.max(1, rect.width)), Std.int(Math.max(1, rect.height)));
 		}
+		// PORT-NOTE: `clipRect` 必须在**位置/缩放都定下来之后**再设 —— 它要按图元当前的
+		// 绘制左上角与缩放换算到帧本地坐标（见 clipToFrameLocal），且 flixel 的 `clipRect`
+		// 不是屏幕矩形（旧代码直接赋屏幕矩形，Mask 子树里的图元会整片不画）。
+		s.clipRect = clipToFrameLocal(clip, s);
 		// PORT-NOTE: 记下**真正画出来**的矩形（见 renderedRectsByNode 的说明）。
 		// 用 `frameWidth/Height * scale` 而不是传入的 `rect`：纯色兜底分支与「有 sprite」
 		// 分支的尺寸来源不同，只有读 FlxSprite 自身几何才与画面严格一致。
@@ -1270,10 +1420,50 @@ class UiRenderer extends FlxGroup {
 			return null;
 		var w = (s.frameWidth > 0 ? s.frameWidth : s.width) * Math.abs(s.scale.x);
 		var h = (s.frameHeight > 0 ? s.frameHeight : s.height) * Math.abs(s.scale.y);
-		// PORT-NOTE: origin 非零时 FlxSprite 的 (x,y) 是**原点**位置，左上角要减去 origin。
-		// 本文件的 Graphic 分支统一把 origin 设成 (0,0)，但世界精灵分支会带上精灵 pivot，
-		// 因此这里按统一公式换算，两种来源都对。
-		return new unity.Rect(s.x - s.origin.x * Math.abs(s.scale.x), s.y - s.origin.y * Math.abs(s.scale.y), w, h);
+		// PORT-NOTE: 位置取**绘制左上角**（统一约定：本文件的各分支都用 `setPosition` 摆左上角，
+		// 唯一例外是世界精灵分支要按 origin/scale 换算，见 flxSpriteTopLeft）。
+		// 旧代码按「flixel 的 (x,y) 是 origin 的位置」又减了一次 origin —— 而 `updateSpriteRenderer`
+		// 已经把 pivot 减掉并 `setPosition(left, top)`，于是记录的绘制矩形整体偏移 -origin，
+		// 表现为「主菜单按钮画得出来但点不到」（命中框与可见框错位）。
+		var topLeft = flxSpriteTopLeft(s);
+		return new unity.Rect(topLeft.x, topLeft.y, w, h);
+	}
+
+	/**
+	 * FlxSprite 在屏幕上的**绘制左上角**（帧本地 (0,0) 落在的屏幕位置）。
+	 *
+	 * PORT-NOTE: flixel 的 `(x, y)` 是「origin 锚点」位置，不是严格意义上的左上角：`drawComplex`
+	 * 里帧内点 p 落到 `(p - origin) * scale + (x, y) - offset + origin`，故左上角为
+	 * `(x, y) - offset + origin * (1 - scale)`。本文件的 Image/纯色/文本分支都把 origin 置 0
+	 * 且从不动 offset（flixel 5.8 的 `setGraphicSize` 不再顺手调 `updateHitbox`），此时它就是
+	 * `(x, y)`；世界精灵分支带 pivot origin 且 scale 可能 ≠ 1，只有按上式换算才与画面一致。
+	 */
+	private static function flxSpriteTopLeft(s:FlxSprite):Vector2 {
+		return new Vector2(s.x - s.offset.x + s.origin.x * (1 - s.scale.x),
+			s.y - s.offset.y + s.origin.y * (1 - s.scale.y));
+	}
+
+	/**
+	 * 屏幕裁剪矩形 → `s` 的**帧本地**裁剪矩形（flixel `clipRect` 的语义）。
+	 *
+	 * PORT-NOTE: `FlxSprite.set_frame` 里是 `frame.clipTo(clipRect, _frame)`，而
+	 * `FlxFrame.clipTo` 先把参数与帧自身的 `(0, 0, frame.width, frame.height)` 求交，
+	 * **不相交就把帧置成 EMPTY（整帧不画）**。因此 `clipRect` 的坐标系是「帧本地像素」，
+	 * 直接把屏幕矩形赋给它，Mask 子树里的图元会全部消失（语言下拉框 `Viewport(Mask)` 下的
+	 * 条目不可见的根因）。这里按 `frameLocal = (screen - 绘制左上角) / |scale|` 换算。
+	 * TODO-PORT: 只按 `|scale|` 换算，未处理翻转（本文件图元的翻转走 `flipX/flipY`，
+	 * 会让裁剪随帧一起镜像，属已知简化）。
+	 */
+	private static function clipToFrameLocal(clipScreen:unity.Rect, s:FlxSprite):flixel.math.FlxRect {
+		if (clipScreen == null || s == null || clipScreen.width <= 0 || clipScreen.height <= 0)
+			return null;
+		var scaleX = Math.abs(s.scale.x);
+		var scaleY = Math.abs(s.scale.y);
+		if (scaleX < 0.0001 || scaleY < 0.0001)
+			return null;
+		var topLeft = flxSpriteTopLeft(s);
+		return clipToFlx(new unity.Rect((clipScreen.x - topLeft.x) / scaleX, (clipScreen.y - topLeft.y) / scaleY,
+			clipScreen.width / scaleX, clipScreen.height / scaleY));
 	}
 
 	/** 无贴图的 Graphic（Unity 里用 s_WhiteTexture 画纯色矩形）→ 拉伸的 1x1 白图。 */
@@ -1291,7 +1481,7 @@ class UiRenderer extends FlxGroup {
 
 	/** 文本（uGUI Text / TMPro TextMeshProUGUI）→ FlxText。 */
 	private function updateText(entry:UiEntry, value:String, size:Float, tint:FlxColor, alpha:Float,
-			alignment:Dynamic, wrap:Bool, richText:Bool, rect:unity.Rect, enabled:Bool):Void {
+			alignment:Dynamic, wrap:Bool, richText:Bool, rect:unity.Rect, enabled:Bool, clipScreen:unity.Rect):Void {
 		var label:FlxText = null;
 		if (entry.kind == UiEntryKind.Label && isInstanceOf(entry.sprite, FlxText))
 			label = cast entry.sprite;
@@ -1327,17 +1517,85 @@ class UiRenderer extends FlxGroup {
 		}
 		label.color = tint;
 		label.alpha = alpha;
+		// PORT-NOTE: 赋值顺序必须是「先 fieldWidth、后 wordWrap」，依据 flixel 5.8.0 的
+		// `FlxText.set_fieldWidth`（haxelib `flixel/text/FlxText.hx:559`）：对**任何正宽度**
+		// 都会强制 `autoSize = false` 且 `wordWrap = true`。旧代码先 `wordWrap = false`
+		// 再设 `fieldWidth`，不换行文本被静默翻回换行；同时 `regenGraphic`（同文件 :864）在
+		// `textField.textHeight == 0` 时把图形高度回落到旧高度（构造后首帧只有
+		// `VERTICAL_GUTTER = 4`px），36px 文字被裁成顶部一条薄片（对话框标题「语言」只剩
+		// 碎片、下拉 caption 看似空框的故障即出于此）。现在正宽度只用来固定文本框宽度
+		// （居中/右对齐要求 `autoSize=false`，见 `alignment` 字段的说明），换行与否由之后的
+		// `wordWrap = wrap` 收口：wrap=false 时 `textField.wordWrap=false`、`_autoHeight`
+		// 仍为 true ⇒ 图形高 = textHeight + 4（单行高）；wrap=true 时与旧行为一致。
+		label.fieldWidth = Math.max(1, rect.width);
 		label.wordWrap = wrap;
 		label.alignment = flixelAlignment(alignment);
-		label.fieldWidth = Math.max(1, rect.width);
 		label.origin.set(0, 0);
 		label.setPosition(rect.x, rect.y);
+		// PORT-NOTE: 文本节点同样要套 Mask 裁剪 —— 旧代码完全不裁剪，Mask 子树里的文字
+		//（语言下拉框的条目文本、ScrollRect 的 `Viewport` 内容）会溢出遮罩区照常显示。
+		// 与图元分支同理：裁剪矩形要按本 FlxText 的绘制左上角/缩放换算到帧本地坐标。
+		label.clipRect = clipToFrameLocal(clipScreen, label);
 		label.visible = enabled && alpha > 0.001 && text.length > 0;
 		// PORT-NOTE: 文本节点也要登记命中矩形（uGUI 的 Text 带 raycastTarget 时可被射线命中）。
 		// 这里用**布局矩形**而不是 FlxText 自身几何：文本的可见宽度随字数变化，
 		// 而 Unity 的点击区是 RectTransform 的矩形（与文字长度无关）。
 		if (entry.gameObject != null)
 			renderedRectsByNode.set(entry.gameObject, rect);
+	}
+
+	/** 世界空间 TextMeshPro → 屏幕（正交相机换算，与 updateSpriteRenderer 同一套）。 */
+	private function updateWorldText(entry:UiEntry, go:GameObject, tmp:TextMeshProUGUI, groupAlpha:Float):Void {
+		var tr = go.transform;
+		// PORT-NOTE: 同 walkWorldCanvas —— 世界坐标必须走 `worldPositionOf`（prefab 节点只写
+		// `localPosition`、`position` 恒为 0 且不级联；代码写过 `position` 的节点按原值采用）。
+		var pos = tr != null ? worldPositionOf(tr) : new Vector3(0, 0, 0);
+		var ppu = orthographicPixelsPerUnit();
+		if (ppu <= 0)
+			ppu = 1;
+		var cam = cameraOrigin();
+		var sx = FlxG.width * 0.5 + (pos.x - cam.x) * ppu;
+		var sy = FlxG.height * 0.5 - (pos.y - cam.y) * ppu;
+		var ls = tr != null ? tr.lossyScale : new Vector3(1, 1, 1);
+		var scaleX = ls.x == 0 ? 1 : Math.abs(ls.x);
+		var scaleY = ls.y == 0 ? 1 : Math.abs(ls.y);
+		// PORT-NOTE: 世界 TMP 的字号是**世界单位**，乘 ppu 得到像素字号。旧代码只做这一步，
+		// 于是 `fontSize = 1.8`（Mainmenu/MainGame 的 Label/Adventure/Version 一类）
+		// 变成 1.8 × 120 = 216px 的巨字。Unity 的 TMP 世界文本会被
+		// enableAutoSizing / fontSizeMin / fontSizeMax 与 rect 约束，这里按同样语义收敛两级：
+		//   1) `enableAutoSizing` 时先把 fontSize 钳到 [fontSizeMin, fontSizeMax]
+		//     （真实 auto-size 是在 min..max 之间二分找「能塞进 rect」的字号；移植层没有 TMP
+		//     的文本度量，只做区间钳制 —— TODO-PORT）；
+		//   2) 再按节点 rect 高度收敛：像素字号不超过 rect 高度 × ppu × |lossyScale.y|
+		//     （即字号不超过文本框高度；Unity auto-size 的结果也是这个量级）。
+		var sizeUnits = tmp.fontSize;
+		if (tmp.enableAutoSizing) {
+			var minSize = tmp.fontSizeMin > 0 ? tmp.fontSizeMin : sizeUnits;
+			var maxSize = tmp.fontSizeMax > 0 ? tmp.fontSizeMax : sizeUnits;
+			sizeUnits = Math.min(Math.max(sizeUnits, minSize), maxSize);
+		}
+		var size = sizeUnits * ppu * scaleY;
+		// 文本框按节点 RectTransform 的 rect（世界单位 → 像素）取，而不是旧代码猜的
+		// `max(200, size * 12)`：rect 宽度直接决定 FlxText 的 fieldWidth（见 updateText）。
+		var rt = tr != null && isInstanceOf(tr, RectTransform) ? cast(tr, RectTransform) : null;
+		var w = rt != null ? Math.abs(rt.sizeDelta.x) * ppu * scaleX : 0;
+		var h = rt != null ? Math.abs(rt.sizeDelta.y) * ppu * scaleY : 0;
+		if (h > 0)
+			size = Math.min(size, h);
+		if (size < 1)
+			size = 1;
+		if (w < 1)
+			w = Math.max(200, size * 12);
+		// 没有 RectTransform 时沿用旧行为：以投影点为中心给一个足够高的文本框。
+		var rect = h > 0 ? new unity.Rect(sx - w * 0.5, sy - h * 0.5, w, h)
+			: new unity.Rect(sx - w * 0.5, sy - size, w, size * 2);
+		var color = tmp.color;
+		if (color == null)
+			color = new unity.Color(1, 1, 1, 1);
+		var alpha = color.a * groupAlpha;
+		var tint = FlxColor.fromRGBFloat(color.r, color.g, color.b, 1);
+		updateText(entry, tmp.text, size, tint, alpha, tmpAlignmentValue(tmp), tmp.enableWordWrapping, tmp.richText, rect,
+			tmp.enabled, null);
 	}
 
 	/** 世界空间 SpriteRenderer → 屏幕（正交相机换算）。 */
@@ -1349,7 +1607,10 @@ class UiRenderer extends FlxGroup {
 		// 成员重复添加（同一个 FlxSprite 属于两个组时 flixel 的绘制/相机解析会互相干扰），
 		// 因此复制它的帧到本组的 sprite 上。
 		var tr:Transform = renderer.transform;
-		var pos = tr != null ? tr.position : new Vector3(0, 0, 0);
+		// PORT-NOTE: 世界坐标走 `worldPositionOf`（prefab 节点只写 `localPosition`、`position`
+		// 恒为 0 且不级联 —— 用它会让所有 prefab 精灵（主菜单背景/按钮）叠在屏幕中心；
+		// 被代码摆过的节点（实体/模型子节点等）由 worldPositionOf 原样采用其 `position`）。
+		var pos = tr != null ? worldPositionOf(tr) : new Vector3(0, 0, 0);
 		var scale = orthographicPixelsPerUnit();
 		var origin = cameraOrigin();
 		var x = FlxG.width * 0.5 + (pos.x - origin.x) * scale;
@@ -1399,7 +1660,11 @@ class UiRenderer extends FlxGroup {
 		var cam = resolveCamera();
 		if (cam == null || cam.transform == null)
 			return new Vector3(0, 0, 0);
-		return cam.transform.position;
+		// PORT-NOTE: 相机的世界坐标同样要走 `worldPositionOf`：prefab 里的相机只有 localPosition
+		//（`position` 恒为 0）—— 此时旧写法让相机原点恒为世界原点，观感/换算全错；
+		// 而由代码平移的相机（`MapController` 直接写 `mapCamera.transform.position`）
+		// 会被 worldPositionOf 原样采用，行为不变。
+		return worldPositionOf(cam.transform);
 	}
 
 	/**
@@ -1484,6 +1749,34 @@ class UiRenderer extends FlxGroup {
 
 	// #region 小工具
 
+	/** TMP 导出数据里的 alignment 哨兵值 = `TextAlignmentOptions.Converted`（0xFFFF）。 */
+	private static inline var TMP_ALIGNMENT_SENTINEL:Int = 65535;
+
+	/**
+	 * TMP 组件**真正生效**的对齐值（供 flixelAlignment 换算）。
+	 *
+	 * PORT-NOTE: 导出数据里 TMP 的 `alignment` 字段恒为 65535（`TextAlignmentOptions.Converted`
+	 * 哨兵，全部 1185 个 TMP 文本组件实测如此），真正的对齐在
+	 * `horizontalAlignment`（1=Left / 2=Center / 4=Right / 8=Justified / 16=Flush，
+	 * 见 `unity/tmpro/TextMeshProUGUI.hx:134`）与 `verticalAlignment`
+	 * （256=Top / 512=Middle / 1024=Bottom）里。旧代码直接拿 `alignment`：
+	 * `65535 & 0xFF = 255`，落进 flixelAlignment 的默认分支（LEFT），于是标题等
+	 * 居中文本全部贴左。这里在哨兵情况下按 TMP 源码的位域约定把两个字段合成
+	 * （水平在低 8 位、垂直自 0x100 起），flixelAlignment 既有的低 8 位映射即可复用。
+	 */
+	private static function tmpAlignmentValue(tmp:TextMeshProUGUI):Dynamic {
+		if (tmp == null)
+			return null;
+		var a:Dynamic = tmp.alignment;
+		if (a != null && (cast a:Int) == TMP_ALIGNMENT_SENTINEL) {
+			// PORT-NOTE: `| 0x100`（Top 位）只是把合成值顶到 >8 的域里，避免
+			// verticalAlignment==0 时（合成值可能 ≤8）被 flixelAlignment 的
+			// `v <= 8` 分支误判成 unity.TextAnchor；OR 不动低 8 位，水平判定不受影响。
+			return tmp.horizontalAlignment | tmp.verticalAlignment | 0x100;
+		}
+		return a;
+	}
+
 	private function flixelAlignment(alignment:Dynamic):flixel.text.FlxText.FlxTextAlign {
 		// PORT-NOTE: TextAnchor 与 TMPro.TextAlignmentOptions 的取值不同（前者 0..8，
 		// 后者是 256/512/… 的位标志），因此按各自规则换算到 Flixel 的 left/center/right。
@@ -1539,7 +1832,7 @@ class UiRenderer extends FlxGroup {
 		return null;
 	}
 
-	private function clipToFlx(clip:unity.Rect):flixel.math.FlxRect {
+	private static function clipToFlx(clip:unity.Rect):flixel.math.FlxRect {
 		if (clip == null || clip.width <= 0 || clip.height <= 0)
 			return null;
 		return flixel.math.FlxRect.get(clip.x, clip.y, clip.width, clip.height);
@@ -1635,7 +1928,17 @@ typedef UiEntry = {
 	/** 上次被遍历到的帧序号。 */
 	lastSeenFrame:Int,
 	/** 该项对应的 SpriteRenderer（非 null 时参与排序层排序）。 */
-	worldRenderer:SpriteRenderer
+	worldRenderer:SpriteRenderer,
+	/**
+	 * 画布分层权重（Unity 的 Canvas 渲染顺序）：0 = 世界空间画布/无画布，1 = ScreenSpaceOverlay。
+	 *
+	 * PORT-NOTE: Unity 里 ScreenSpaceOverlay 画布**永远画在世界空间画布之上**（与层级顺序无关）。
+	 * 移植层把所有 Graphic 放进同一个 FlxGroup、按深度优先层级顺序绘制，于是挂在
+	 * `MainGame/MainScene/UI`（Overlay 画布）下的对话框会被后遍历的 `Mainmenu`（世界空间画布）
+	 * 盖住 —— InputNameDialog 在首 run 完全不显示就是这个原因。applyOrder 按本字段稳定分区：
+	 * 0 在前、1 在后（同组内保持层级顺序与排序层排序结果）。
+	 */
+	overlayRank:Int
 };
 
 // PORT-NOTE: 枚举成员刻意**不叫** `Image` / `Text` / `Solid` / `SpriteRenderer`。

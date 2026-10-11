@@ -271,6 +271,7 @@ class UnityCollisionSystem extends MonoBehaviour implements ICollisionSystem {
     }
 }
 
+@:rtti
 class SerializableUnityCollisionSystem implements ISerializableCollisionSystem {
     public var entities:Array<SerializableUnityCollisionEntity>;
     public var entityTrash:Array<SerializableUnityCollisionEntity>;

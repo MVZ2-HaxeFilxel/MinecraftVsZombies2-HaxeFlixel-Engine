@@ -15,12 +15,12 @@ class VanillaEnemyProps
     {
         return new VanillaEntityPropertyMeta<T>(name, defaultValue, obsoleteNames);
     }
-    public static var SPEED:PropertyMeta<Float> = Get("speed");
-    public static var CAN_ARMOR:PropertyMeta<Bool> = Get("canArmor");
-    public static var MAX_ATTACK_HEIGHT:PropertyMeta<Float> = Get("maxAttackHeight");
-    public static var NO_REWARD:PropertyMeta<Bool> = Get("noReward");
+    public static var SPEED:PropertyMeta<Float> = Get("speed", 0.0);
+    public static var CAN_ARMOR:PropertyMeta<Bool> = Get("canArmor", false);
+    public static var MAX_ATTACK_HEIGHT:PropertyMeta<Float> = Get("maxAttackHeight", 0.0);
+    public static var NO_REWARD:PropertyMeta<Bool> = Get("noReward", false);
     public static var DEATH_MESSAGE:PropertyMeta<String> = Get("deathMessage");
-    public static var IS_NEUTRALIZED:PropertyMeta<Bool> = Get("isNeutralized");
+    public static var IS_NEUTRALIZED:PropertyMeta<Bool> = Get("isNeutralized", false);
     public static var EXCLUDED_AREA_TAGS:PropertyMeta<Array<NamespaceID>> = Get("excludedAreaTags");
     // C#: extension method GetSpeed(this Entity enemy, bool ignoreBuffs = false)
     public static function GetSpeed(enemy:Entity, ignoreBuffs:Bool = false):Float
@@ -82,7 +82,7 @@ class VanillaEnemyProps
     // #endregion
 
     // #region 低矮
-    public static var LOW_ENEMY:PropertyMeta<Bool> = Get("low_enemy");
+    public static var LOW_ENEMY:PropertyMeta<Bool> = Get("low_enemy", false);
     // C#: extension method IsLowEnemy(this EntityDefinition enemy)
     public static function IsLowEnemy(enemy:EntityDefinition):Bool
     {
@@ -91,7 +91,7 @@ class VanillaEnemyProps
     // #endregion
 
     // #region 飞行
-    public static var FLYING_ENEMY:PropertyMeta<Bool> = Get("flying_enemy");
+    public static var FLYING_ENEMY:PropertyMeta<Bool> = Get("flying_enemy", false);
     // C#: extension method IsFlyingEnemy(this EntityDefinition enemy)
     public static function IsFlyingEnemy(enemy:EntityDefinition):Bool
     {
@@ -100,7 +100,7 @@ class VanillaEnemyProps
     // #endregion
 
     // #region 不与行对齐
-    public static var NO_ALIGN_TO_LANE:PropertyMeta<Bool> = Get("no_align_to_lane");
+    public static var NO_ALIGN_TO_LANE:PropertyMeta<Bool> = Get("no_align_to_lane", false);
     // C#: extension method NoAlignToLane(this Entity enemy)
     public static function NoAlignToLane(enemy:Entity):Bool
     {
@@ -137,7 +137,7 @@ class VanillaEnemyProps
     }
     // #endregion
 
-    public static var IMMUNE_VORTEX:PropertyMeta<Bool> = Get("immuneVortex");
+    public static var IMMUNE_VORTEX:PropertyMeta<Bool> = Get("immuneVortex", false);
     // C#: extension method ImmuneVortex(this Entity enemy)
     public static function ImmuneVortex(enemy:Entity):Bool
     {

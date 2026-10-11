@@ -20,8 +20,8 @@ class EngineArmorProps
 		return new PropertyMeta<T>(name, defaultValue);
 	}
 	public static var TINT:PropertyMeta<Color> = Get("tint", Color.white);
-	public static var COLOR_OFFSET:PropertyMeta<Color> = Get("colorOffset");
-	public static var MAX_HEALTH:PropertyMeta<Float> = Get("maxHealth");
+	public static var COLOR_OFFSET:PropertyMeta<Color> = Get("colorOffset", new Color(0, 0, 0, 0));
+	public static var MAX_HEALTH:PropertyMeta<Float> = Get("maxHealth", 0.0);
 	public static var SHELL:PropertyMeta<NamespaceID> = Get("shell");
 	// C#: NamespaceID? GetShellID(this ArmorDefinition definition) / NamespaceID? GetShellID(this Armor armor, bool ignoreBuffs = false)
 	public static function GetShellID(target:Dynamic, ignoreBuffs:Bool = false):Null<NamespaceID>

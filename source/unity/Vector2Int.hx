@@ -1,6 +1,7 @@
 package unity;
 
 // Minimal UnityEngine.Vector2Int shim.
+@:rtti
 class Vector2Int {
     public var x:Int;
     public var y:Int;

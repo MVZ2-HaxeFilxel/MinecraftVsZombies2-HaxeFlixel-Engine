@@ -5,6 +5,7 @@ import mvz2logic.resources.SpriteReference;
 import Main;  // UNKNOWNIMPORT
 import tools.ObjectExtensions;
 import unity.SpriteRenderer;
+import unity.UnityObject;
 
 // [RequireComponent(typeof(SpriteRenderer))]
 class ModelPropertySpriteSetterReference extends ModelComponent {
@@ -29,7 +30,7 @@ class ModelPropertySpriteSetterReference extends ModelComponent {
     }
     private var Renderer(get, never):SpriteRenderer;
     function get_Renderer():SpriteRenderer {
-        if (!sprRenderer.Exists()) {
+        if (!unity.UnityObject.exists(sprRenderer)) {
             sprRenderer = GetComponent(SpriteRenderer);
         }
         return sprRenderer;

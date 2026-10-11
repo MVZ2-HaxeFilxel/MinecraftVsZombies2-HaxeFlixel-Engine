@@ -21,6 +21,7 @@ import unity.Vector2;
 import unity.Vector3;
 import unity.rendering.RenderPipeline;
 import unity.rendering.SortingGroup;
+import unity.UnityObject;
 
 class ModelManager extends unity.MonoBehaviour {
     public function new() {
@@ -35,7 +36,7 @@ class ModelManager extends unity.MonoBehaviour {
         //设置模型
         var builder = new ModelBuilder(id, modelShotCamera);
         var modelInstance = builder.Build(modelShotPositionTransform);
-        if (!modelInstance.Exists()) {
+        if (!unity.UnityObject.exists(modelInstance)) {
             Debug.LogWarning('Prefab of model ${id} is missing!');
             return null;
         }

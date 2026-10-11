@@ -194,6 +194,7 @@ class BlueprintTooltipSource implements ITooltipSource
 	private var blueprintController:BlueprintController;
 }
 
+@:rtti
 class SerializableBlueprintController
 {
 	public var model:SerializableModelData;

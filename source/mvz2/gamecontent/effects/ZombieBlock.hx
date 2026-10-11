@@ -18,6 +18,7 @@ import tools.FrameTimer;
 import tools.ObjectExtensions;
 import unity.Mathf;
 import unity.Vector3;
+import unity.UnityObject;
 import mvz2.gamecontent.effects.VanillaEffectID.VanillaEffectNames;
 import mvz2.vanilla.detection.Detector.DetectionParams;
 using mvz2.vanilla.entities.VanillaColliderExt;
@@ -42,7 +43,7 @@ class ZombieBlock extends EffectBehaviour
     {
         super.Update(entity);
         var parent = entity.Parent;
-        if (parent == null || !parent.Exists())
+        if (parent == null || !unity.UnityObject.exists(parent))
         {
             entity.Remove();
             return;

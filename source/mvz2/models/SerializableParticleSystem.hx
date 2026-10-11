@@ -5,6 +5,7 @@ import unity.ParticleSystem;
 import unity.ParticleSystem.Particle;  // SUBIMPORT
 import unity.ParticleSystemStopBehavior;
 
+@:rtti
 class SerializableParticleSystem
 {
 	public var stateBeforePaused:Int;

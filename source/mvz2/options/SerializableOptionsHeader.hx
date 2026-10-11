@@ -3,6 +3,7 @@ package mvz2.options;
 
 // [Serializable]
 // [BsonIgnoreExtraElements]
+@:rtti
 class SerializableOptionsHeader {
     public var version:Int;
 

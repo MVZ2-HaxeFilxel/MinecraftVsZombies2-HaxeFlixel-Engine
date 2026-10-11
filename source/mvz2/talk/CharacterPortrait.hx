@@ -51,15 +51,15 @@ class CharacterPortrait {
         RenderTexture.ReleaseTemporary(targetRT);
 
 
-        if (sprite.Exists()) {
+        if (unity.UnityObject.exists(sprite)) {
             UnityObject.Destroy(sprite);
             sprite = null;
         }
     }
     public function Dispose():Void {
-        if (texture2d.Exists())
+        if (unity.UnityObject.exists(texture2d))
             UnityObject.Destroy(texture2d);
-        if (sprite.Exists())
+        if (unity.UnityObject.exists(sprite))
             UnityObject.Destroy(sprite);
         component.DestroyGameObject();
     }
@@ -67,7 +67,7 @@ class CharacterPortrait {
         return texture2d;
     }
     public function GetSprite():Sprite {
-        if (!sprite.Exists()) {
+        if (!unity.UnityObject.exists(sprite)) {
             sprite = Sprite.Create(texture2d, new Rect(0, 0, texture2d.width, texture2d.height), Vector2.one * 0.5);
         }
         return sprite;

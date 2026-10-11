@@ -15,11 +15,23 @@ class TranslateComponent<T:Component> extends MonoBehaviour {
     }
 
     private function OnEnable():Void {
-        lang.OnLanguageChanged.add(OnLanguageChangedCallback);
-        Translate(lang.GetCurrentLanguage());
+        // PORT-NOTE: 移植层的 prefab 注入/SetActive 派发可能早于 MainManager.Instance 就绪
+        // （Unity 里 Awake/OnEnable 的引擎顺序掩盖了这一点）。lang 为空时跳过登记，
+        // 等语言管理器就绪后的首次 OnLanguageChanged/Translate 由后续流程补齐。
+        var lm = MainManager.Instance != null ? MainManager.Instance.LanguageManager : null;
+        if (lm == null) {
+            mvz2.states.BootTrace.step('TranslateComponent.OnEnable 跳过（lang==null）@'
+                + (gameObject != null ? gameObject.name : "?") + ' ' + Type.getClassName(Type.getClass(this)));
+            return;
+        }
+        lm.OnLanguageChanged.add(OnLanguageChangedCallback);
+        Translate(lm.GetCurrentLanguage());
     }
     private function OnDisable():Void {
-        lang.OnLanguageChanged.remove(OnLanguageChangedCallback);
+        var lm = MainManager.Instance != null ? MainManager.Instance.LanguageManager : null;
+        if (lm == null)
+            return;
+        lm.OnLanguageChanged.remove(OnLanguageChangedCallback);
     }
     // virtual
     private function Translate(language:String):Void {

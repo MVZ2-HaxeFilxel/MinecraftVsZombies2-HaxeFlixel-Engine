@@ -9,11 +9,11 @@ import pvzengine.armors.Armor;
 @:propertyRegistryRegion(PropertyRegions.armor)
 class VanillaArmorProps
 {
-    static function Get<T>(name:String):PropertyMeta<T>
+    static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
     {
-        return new PropertyMeta<T>(name);
+        return new PropertyMeta<T>(name, defaultValue);
     }
-    public static var NO_DISCARD:PropertyMeta<Bool> = Get("noDiscard");
+    public static var NO_DISCARD:PropertyMeta<Bool> = Get("noDiscard", false);
     public static function HasNoDiscard(armor:Armor):Bool
     {
         return armor.GetProperty(NO_DISCARD);

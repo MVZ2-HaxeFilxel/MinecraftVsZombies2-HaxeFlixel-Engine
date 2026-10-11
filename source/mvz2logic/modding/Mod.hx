@@ -119,10 +119,12 @@ class Mod implements IModLogic
 	{
 		return SerializeHelper.ToBson(obj);
 	}
-	public function Deserialize<T>(json:String):T
+	public function Deserialize<T>(json:String, type:Class<T>):T
 	{
-		// PORT-NOTE: C# 为 SerializeHelper.FromBson<T>(json)，靠返回类型推断 T。
-		return SerializeHelper.FromBson(json);
+		// PORT-NOTE: C# 为 SerializeHelper.FromBson<T>(json)。泛型函数内无法做编译期分派，
+		// 这里走与存档类型一致的运行期 RTTI hydration（TypedJson）——haxe.Json.parse 的匿名
+		// 产物（hx::Anon）不能直接当类实例返回，否则 hxcpp 固定偏移字段访问会读到错位数据。
+		return cast mvz2logic.serialization.TypedJson.hydrate(haxe.Json.parse(json), Type.getClassName(type));
 	}
 	// #endregion
 

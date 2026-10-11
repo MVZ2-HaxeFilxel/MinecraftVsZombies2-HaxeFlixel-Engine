@@ -13,6 +13,7 @@ import pvzengine.level.LevelEngine;
 //   ((LawnGrid) / (LevelEngine, SerializableGridSourceReference))，Haxe 无重载，
 //   合并为一个按首参类型分派的方法（首参为 LevelEngine 时走反序列化分支；
 //   其余非 LawnGrid 的实参视为 Clone() 使用的字段记录，见 Clone 的 PORT-NOTE）。
+@:rtti
 class GridSourceReference implements ILevelSourceReference
 {
 	public function new(source:Dynamic, ?seri:Dynamic)
@@ -109,6 +110,7 @@ class GridSourceReference implements ILevelSourceReference
 }
 
 // Ported from: Assets/Scripts/Engine/Level/Entities/GridSourceReference.cs (class SerializableGridSourceReference)
+@:rtti
 class SerializableGridSourceReference implements ISerializableSourceReference
 {
 	public function new(reference:GridSourceReference)

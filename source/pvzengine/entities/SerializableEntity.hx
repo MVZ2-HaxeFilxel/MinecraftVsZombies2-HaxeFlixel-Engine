@@ -13,6 +13,7 @@ import tools.SerializableRNG;
 import unity.Vector3;
 
 // PORT-NOTE: C# 的 `Dictionary<string, T>?` → Haxe `Map<String, T>`；`T[]?` → `Array<T>`。
+@:rtti
 class SerializableEntity
 {
 	public function new() {}

@@ -37,6 +37,7 @@ class KeyBindingOptions {
 }
 
 // [Serializable]
+@:rtti
 class SerializableKeyBindingOptions {
     public function new() {}
     public var bindings:Map<NamespaceID, Int>;

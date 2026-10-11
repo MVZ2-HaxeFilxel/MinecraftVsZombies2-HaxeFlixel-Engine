@@ -28,6 +28,7 @@ class HPBarOptions {
 
 // [Serializable]
 // [BsonIgnoreExtraElements]
+@:rtti
 class SerializableHPBarOptions {
     public function new() {}
     public var enabled:Bool;

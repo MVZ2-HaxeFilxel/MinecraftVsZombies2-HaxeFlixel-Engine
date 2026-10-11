@@ -125,8 +125,12 @@ class GameEntrance extends MonoBehaviour {
                     var desc = main.LanguageManager._(ERROR_ALL_USERS_CORRUPTED);
                     main.Scene.ShowDialogMessageAsync(title, desc).awaitResult();
 
-                    var result:String = main.Scene.ShowInputNameDialogAsync(InputNameType.Initialize).awaitResult();
-                    var newIndex = main.SaveManager.CreateNewUser(result);
+                    // PORT-NOTE: C# 在这里 await InputNameDialog 等玩家输入名字；移植层的 Task
+                    // shim 是同步直通（awaitResult 不等待，见 system/threading/tasks/Task.hx），
+                    // 弹出的对话框无人等待、流程又必须立刻给出用户名 —— 原样移植会以 null
+                    // 建用户（SetUserName 写回 null，metas 仍为 null → 下次启动重复「全损坏」
+                    // 流程，InputNameDialog 反复出没）。同步模型的等价改法：以默认名创建用户。
+                    var newIndex = main.SaveManager.CreateNewUser(DEFAULT_NEW_USERNAME);
                     main.SaveManager.SetCurrentUserIndex(newIndex);
                     main.SaveManager.SaveUserList();
                 }
@@ -136,13 +140,13 @@ class GameEntrance extends MonoBehaviour {
                     var desc = main.LanguageManager._(ERROR_FULL_USERS_CORRUPTED);
                     main.Scene.ShowDialogMessageAsync(title, desc).awaitResult();
 
-                    var users = main.SaveManager.GetAllUsers();
-                    var deleteIndex:Int = main.Scene.ShowDeleteUserDialogAsync(users).awaitResult();
-                    main.SaveManager.DeleteUser(deleteIndex);
+                    // PORT-NOTE: 同 AllCorrupted：ShowDeleteUserDialogAsync / ShowInputNameDialogAsync
+                    // 的 awaitResult 在同步模型下直通（null），原样移植会拿 null 去删用户/建用户。
+                    // 等价改法：删除栏位 0 的损坏数据并以默认名重建用户。
+                    main.SaveManager.DeleteUser(0);
                     main.SaveManager.SaveUserList();
 
-                    var result:String = main.Scene.ShowInputNameDialogAsync(InputNameType.Initialize).awaitResult();
-                    var newIndex = main.SaveManager.CreateNewUser(result);
+                    var newIndex = main.SaveManager.CreateNewUser(DEFAULT_NEW_USERNAME);
                     main.SaveManager.SetCurrentUserIndex(newIndex);
                     main.SaveManager.SaveUserList();
                 }
@@ -174,6 +178,10 @@ class GameEntrance extends MonoBehaviour {
     public static inline var ERROR_ALL_USERS_CORRUPTED:String = "所有存档均无法读取，文件可能已损坏。\n必须新建存档以继续游戏。";
     @:translateMsg("开始游戏时读取出错，对话框的错误信息")
     public static inline var ERROR_FULL_USERS_CORRUPTED:String = "所有存档均无法读取，文件可能已损坏。\n必须删除一个存档，并新建存档以继续游戏。";
+    // PORT-NOTE: 移植层新增：同步 Task shim 下「全损坏」流程无法等待玩家输入名字，
+    // 以该默认名直接建用户（见 CheckSaveDataStatus 的 PORT-NOTE）。
+    // TODO-PORT: Task.awaitResult 协程化后应还原为弹 InputNameDialog 输入。
+    public static inline var DEFAULT_NEW_USERNAME:String = "Player";
 
     @:serializeField
     private var main:MainManager = null;

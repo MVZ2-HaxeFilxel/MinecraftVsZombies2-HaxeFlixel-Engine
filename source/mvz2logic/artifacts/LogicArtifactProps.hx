@@ -11,15 +11,15 @@ import tools.FrameTimer;
 @:propertyRegistryRegion(PropertyRegions.artifact)
 class LogicArtifactProps
 {
-	public static function Get<T>(name:String):PropertyMeta<T>
+	public static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
 	{
-		return new PropertyMeta<T>(name);
+		return new PropertyMeta<T>(name, defaultValue);
 	}
 	public static var SPRITE_REFERENCE:PropertyMeta<SpriteReference> = Get("spriteReference");
-	public static var NUMBER:PropertyMeta<Int> = Get("number");
+	public static var NUMBER:PropertyMeta<Int> = Get("number", 0);
 	public static var DISPLAY_TEXT:PropertyMeta<String> = Get("display_text");
-	public static var INACTIVE:PropertyMeta<Bool> = Get("inactive");
-	public static var GLOWING:PropertyMeta<Bool> = Get("glowing");
+	public static var INACTIVE:PropertyMeta<Bool> = Get("inactive", false);
+	public static var GLOWING:PropertyMeta<Bool> = Get("glowing", false);
 	// PORT-NOTE: C# 扩展方法 this ArtifactDefinition definition -> 静态方法
 	public static function GetSpriteReference(definition:ArtifactDefinition):Null<SpriteReference>
 	{

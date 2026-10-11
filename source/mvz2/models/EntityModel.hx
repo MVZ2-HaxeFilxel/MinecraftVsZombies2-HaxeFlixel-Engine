@@ -121,6 +121,7 @@ class EntityModel extends Model
 	private var bone:ModelBone;
 }
 
+@:rtti
 class SerializableSpriteModelData extends SerializableModelData
 {
 	public function new()

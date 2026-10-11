@@ -221,6 +221,7 @@ class UIComponent extends MVZ2Component implements IUIComponent
 	}
 }
 
+@:rtti
 class SerializableUIComponent implements ISerializableLevelComponent
 {
 	public var targetType:Int;

@@ -65,6 +65,7 @@ class LevelControllerPart extends MonoBehaviour implements ILevelControllerPart
 }
 
 // PORT-NOTE: C# 的 abstract class 在 Haxe 中语义不同（这里仍写作普通 class）。
+@:rtti
 class SerializableLevelControllerPart
 {
 	public var id:NamespaceID;

@@ -135,6 +135,7 @@ class AdviceComponent extends MVZ2Component implements IAdviceComponent
 	}
 }
 
+@:rtti
 class SerializableAdviceComponent implements ISerializableLevelComponent
 {
 	public var adviceContext:String;

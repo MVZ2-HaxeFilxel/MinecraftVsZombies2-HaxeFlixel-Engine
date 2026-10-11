@@ -255,6 +255,7 @@ class ModelGroup extends unity.MonoBehaviour
 	// #endregion
 }
 
+@:rtti
 class SerializableModelGroup
 {
 	public var animators:Array<SerializableAnimator>;

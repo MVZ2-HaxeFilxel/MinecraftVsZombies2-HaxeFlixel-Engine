@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Contraptions/VanillaContraptionExt.cs
 package mvz2.vanilla.contraptions;
 
+import unity.UnityObject;
 import mvz2.gamecontent.buffs.contraptions.ImitatedBuff;
 import mvz2.gamecontent.buffs.contraptions.NocturnalBuff;
 import mvz2.gamecontent.effects.VanillaEffectID;
@@ -97,7 +98,7 @@ class VanillaContraptionExt
                 for (layer in carryingLayers)
                 {
                     var target = grid.GetLayerEntity(layer);
-                    if (target != null && target.Exists() && target != contraption)
+                    if (target != null && unity.UnityObject.exists(target) && target != contraption)
                         return true;
                 }
             }
@@ -120,7 +121,7 @@ class VanillaContraptionExt
                 for (layer in protectingLayers)
                 {
                     var target = grid.GetLayerEntity(layer);
-                    if (target != null && target.Exists() && target != contraption)
+                    if (target != null && unity.UnityObject.exists(target) && target != contraption)
                         return target;
                 }
             }
@@ -145,7 +146,7 @@ class VanillaContraptionExt
                 for (layer in protectingLayers)
                 {
                     var target = grid.GetLayerEntity(layer);
-                    if (target != null && target.Exists() && target != contraption)
+                    if (target != null && unity.UnityObject.exists(target) && target != contraption)
                     {
                         targets.push(target);
                     }
@@ -164,7 +165,7 @@ class VanillaContraptionExt
             if (grid == null)
                 continue;
             var protector = grid.GetProtectorEntity();
-            if (protector != null && protector.Exists() && protector != contraption)
+            if (protector != null && unity.UnityObject.exists(protector) && protector != contraption)
                 return protector;
         }
         return null;

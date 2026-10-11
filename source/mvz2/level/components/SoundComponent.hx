@@ -12,6 +12,7 @@ import pvzengine.level.LevelEngine;
 import unity.Vector3;
 import unity.Mathf;
 import unity.Debug;
+import unity.UnityObject;
 import mvz2.audios.SoundManager;
 import mvz2.managers.ResourceManager;
 import Main;
@@ -151,7 +152,7 @@ class SoundComponent extends MVZ2Component implements ISoundComponent
 		for (entityID in entities.keys())
 		{
 			var ent = Level.FindEntityByID(entityID);
-			if (ent == null || !ent.Exists())
+			if (ent == null || !unity.UnityObject.exists(ent))
 			{
 				toRemove.push(entityID);
 			}
@@ -264,12 +265,14 @@ class SoundComponent extends MVZ2Component implements ISoundComponent
 	private var loopSoundBuffer:Array<NamespaceID> = [];
 }
 
+@:rtti
 class SerializableSoundComponent implements ISerializableLevelComponent
 {
 	public var loopSounds:Array<SerializableLoopSoundItem>;
 	public function new() {}
 }
 
+@:rtti
 class SerializableLoopSoundItem
 {
 	public var id:NamespaceID;

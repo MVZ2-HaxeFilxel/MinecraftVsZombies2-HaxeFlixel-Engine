@@ -166,6 +166,7 @@ class ModelGroupRenderer extends ModelGroup
 }
 
 // abstract
+@:rtti
 class SerializableModelGroupRenderer extends SerializableModelGroup
 {
 	public var particles:Array<SerializableParticleSystem>;

@@ -88,6 +88,18 @@ class ModelPrefabAssets {
 			if (definition != null)
 				return mvz2.sprites.SpriteManifestLoader.createSprite(definition);
 		}
+		// PORT-NOTE: Prefab 资产引用（kind=="Prefab"）：Unity 里这种字段持有 prefab 资产
+		// （如 LevelController.entityTemplate = Prefabs/Entity/Entity.prefab），Instantiate 它
+		// 才得到实例。移植层没有资产实例句柄，改为按 key 实例化一次并缓存（Resolve 自带 cache），
+		// 返回实例根 GameObject；ModelPrefabContext.decode 再按目标字段类型取组件。
+		// InstantiatePrefab 的 callAwakeInInstantiate=false：模板只作克隆源，不跑生命周期。
+		if (ref.path != null && ref.path.indexOf(".prefab") > 0
+				&& (ref.kind == "Prefab" || ref.path.indexOf("Prefabs/") == 0)) {
+			var key = ref.path.substr(0, ref.path.indexOf(".prefab"));
+			var go = mvz2.scenes.ScenePrefabLoader.InstantiatePrefab(key, null, false);
+			if (go != null)
+				return go;
+		}
 		// PORT-NOTE: AnimatorController / AnimationClip 引用返回**数据 key 字符串**
 		// （相对 assets 的路径，含扩展名）。`unity.Animator.runtimeAnimatorController` 的 setter
 		// 接受字符串并按 key 加载 controller 数据（见 unity/Animator.hx 与

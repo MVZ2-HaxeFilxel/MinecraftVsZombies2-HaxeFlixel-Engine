@@ -111,6 +111,11 @@ class MainSceneController extends MonoBehaviour implements IGlobalScene {
     public function ShowInputNameDialogAsync(type:InputNameType):Task {
         return inputNameDialog.Show(type);
     }
+    // PORT-NOTE: 移植层新增：同步 Task shim 直通后由主流程收起输入名字对话框（见
+    // MainmenuController.Init 的 PORT-NOTE；对应 C# 里玩家点确认后的正常 Hide）。
+    public function HideInputNameDialog():Void {
+        inputNameDialog.Dismiss();
+    }
     public function ShowInputNameDialogRenameAsync(index:Int):Task {
         return inputNameDialog.ShowRename(index);
     }
@@ -149,7 +154,10 @@ class MainSceneController extends MonoBehaviour implements IGlobalScene {
         StartPortalFade(0, 2);
     }
     public function SetPortalAlpha(alpha:Float):Void {
-        portal.SetAlpha(1);
+        // PORT-NOTE: C# 原实现写死 portal.SetAlpha(1)，忽略参数；TalkController 的
+        // "portal set <alpha>" / "portal fade" 命令（TalkController.hx:349/353）会传任意
+        // alpha 进来，这里按参数名语义透传（参考 Unity Instantiate/属性 setter 行为）。
+        portal.SetAlpha(alpha);
     }
     public function StartPortalFade(target:Float, duration:Float):Void {
         portal.StartFade(target, duration);

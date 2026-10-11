@@ -6,6 +6,7 @@ import mvz2logic.options.LogicOptionItemID;
 import pvzengine.NamespaceID;
 import unity.AudioMixer;
 import unity.AudioSource;
+import unity.Debug;
 import unity.MonoBehaviour;
 import unity.Quaternion;
 import unity.Transform;
@@ -26,18 +27,26 @@ class SoundManager extends MonoBehaviour {
         return Play(id, Vector3.zero, pitch, 0);
     }
     public function Play(id:NamespaceID, pos:Vector3, pitch:Float = 1, spatialBlend:Float = 1):AudioSource {
-        if (id == null)
+        if (id == null) {
+            WarnOnce("Play/null-id", "SoundManager.Play：音效 id 为 null，已跳过播放。");
             return null;
+        }
         var soundsMeta = main.ResourceManager.GetSoundMetaList(id.SpaceName);
         var meta = main.ResourceManager.GetSoundMeta(id);
-        if (soundsMeta == null || meta == null)
+        if (soundsMeta == null || meta == null) {
+            WarnOnce('Play/meta/$id', 'SoundManager.Play：音效「$id」没有元数据（sounds.xml 的 sounds / ModResource.SoundMetaList 缺失）。');
             return null;
+        }
         var sample = meta.GetRandomSample();
-        if (sample == null)
+        if (sample == null) {
+            WarnOnce('Play/sample/$id', 'SoundManager.Play：音效「$id」没有可用采样（sounds.xml 里的 samples 为空）。');
             return null;
+        }
         var clip = main.ResourceManager.GetSoundClip(sample.path);
-        if (clip == null)
+        if (clip == null) {
+            WarnOnce('Play/clip/$id/${sample.path}', 'SoundManager.Play：音效「$id」的采样 ${sample.path} 取不到 AudioClip（ModResource.Sounds 里没有该资源）。');
             return null;
+        }
         var maxCount = meta.maxCount;
         var sameSoundSources = Lambda.array(Lambda.filter(soundSources, s -> s.SoundID == id));
         if (maxCount > 0 && sameSoundSources.length >= maxCount) {
@@ -60,20 +69,28 @@ class SoundManager extends MonoBehaviour {
     }
     // #region 循环音效
     public function PlayLoopSound(id:NamespaceID):Bool {
-        if (id == null)
+        if (id == null) {
+            WarnOnce("PlayLoopSound/null-id", "SoundManager.PlayLoopSound：音效 id 为 null，已跳过播放。");
             return false;
+        }
         if (IsPlayingLoopSound(id))
             return false;
         var soundsMeta = main.ResourceManager.GetSoundMetaList(id.SpaceName);
         var meta = main.ResourceManager.GetSoundMeta(id);
-        if (soundsMeta == null || meta == null)
+        if (soundsMeta == null || meta == null) {
+            WarnOnce('PlayLoopSound/meta/$id', 'SoundManager.PlayLoopSound：音效「$id」没有元数据（sounds.xml 的 sounds / ModResource.SoundMetaList 缺失）。');
             return false;
+        }
         var sample = meta.GetRandomSample();
-        if (sample == null)
+        if (sample == null) {
+            WarnOnce('PlayLoopSound/sample/$id', 'SoundManager.PlayLoopSound：音效「$id」没有可用采样（sounds.xml 里的 samples 为空）。');
             return false;
+        }
         var clip = main.ResourceManager.GetSoundClip(sample.path);
-        if (clip == null)
+        if (clip == null) {
+            WarnOnce('PlayLoopSound/clip/$id/${sample.path}', 'SoundManager.PlayLoopSound：音效「$id」的采样 ${sample.path} 取不到 AudioClip（ModResource.Sounds 里没有该资源）。');
             return false;
+        }
         var source = UnityObject.Instantiate(loopSoundTemplate, Vector3.zero, Quaternion.identity, loopSoundSourceRoot);
         source.SoundID = id;
         source.gameObject.name = Std.string(id);
@@ -167,6 +184,7 @@ class SoundManager extends MonoBehaviour {
     private function UpdateLoopSound(id:NamespaceID, source:SoundSource, intensity:Float):Void {
         var meta = Main.ResourceManager.GetSoundMeta(id);
         if (meta == null) {
+            WarnOnce('UpdateLoopSound/meta/$id', 'SoundManager.UpdateLoopSound：音效「$id」没有元数据，循环音效的强度/音量不生效。');
             source.Volume = intensity;
             source.Pitch = 1;
             return;
@@ -182,6 +200,14 @@ class SoundManager extends MonoBehaviour {
         soundSources.remove(source);
         UnityObject.Destroy(source.gameObject);
     }
+    /** 同一条播放失败原因只告警一次（播放失败通常每帧/每次点击都会重试）。 */
+    private static function WarnOnce(key:String, message:String):Void {
+        if (warnedKeys.exists(key))
+            return;
+        warnedKeys.set(key, true);
+        Debug.LogWarning(message);
+    }
+    private static var warnedKeys:Map<String, Bool> = new Map();
     public var Main(get, never):MainManager;
     inline function get_Main():MainManager return main;
 

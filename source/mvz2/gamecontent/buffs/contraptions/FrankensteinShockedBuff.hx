@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Buffs/Contraption/Chapter1/FrankensteinShockedBuff.cs
 package mvz2.gamecontent.buffs.contraptions;
 
+import unity.UnityObject;
 import mvz2.gamecontent.buffs.VanillaBuffNames;
 import mvz2.gamecontent.models.VanillaModelID;
 import mvz2.vanilla.entities.VanillaEntityProps;
@@ -37,7 +38,7 @@ class FrankensteinShockedBuff extends BuffDefinition
             return;
         }
         var entity = buff.GetEntity();
-        if (entity == null || !entity.Exists() || entity.IsDead)
+        if (entity == null || !unity.UnityObject.exists(entity) || entity.IsDead)
         {
             buff.Remove();
             return;

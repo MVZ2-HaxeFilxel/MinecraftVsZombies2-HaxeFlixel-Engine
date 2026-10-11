@@ -6,6 +6,7 @@ import unity.RectTransform;
 import unity.Sprite;
 import unity.Vector2;
 import unity.ui.Image;
+import unity.UnityObject;
 
 class CharacterPortraitComponentLayer extends unity.MonoBehaviour {
     public function new() {
@@ -18,7 +19,7 @@ class CharacterPortraitComponentLayer extends unity.MonoBehaviour {
         image.enabled = viewData.sprite != null;
         rectTransform.anchoredPosition = viewData.position;
         // PORT-NOTE: C# 为 `image.sprite.rect.size`；shim 的 Sprite 提供 rect，故按原逻辑取 rect.size。
-        rectTransform.sizeDelta = image.sprite.Exists() ? image.sprite.rect.size : Vector2.zero;
+        rectTransform.sizeDelta = unity.UnityObject.exists(image.sprite) ? image.sprite.rect.size : Vector2.zero;
     }
     public var rectTransform:RectTransform = null;
     public var image:Image = null;

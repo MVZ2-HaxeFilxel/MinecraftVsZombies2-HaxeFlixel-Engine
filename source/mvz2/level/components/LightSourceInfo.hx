@@ -4,6 +4,7 @@ package mvz2.level.components;
 import haxe.Int64;
 
 // 对应 C# 的 [Serializable] class SerializableLightSourceInfo
+@:rtti
 class SerializableLightSourceInfo
 {
 	public var id:Int64;

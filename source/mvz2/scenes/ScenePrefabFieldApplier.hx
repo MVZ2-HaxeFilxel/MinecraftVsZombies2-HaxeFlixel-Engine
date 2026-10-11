@@ -50,15 +50,25 @@ class ScenePrefabFieldApplier {
 			}
 			var raw:Dynamic = Reflect.field(fields, name);
 			var current:Dynamic = getField(comp, name);
-			// 子字典（如 LayoutGroup 的 padding / CanvasScaler 的 referenceResolution）递归写入
-			// 现有子对象，而不是替换它。
-			if (isPlainDict(raw) && isNestedObject(current)) {
-				applyNested(current, raw, ctx);
-				continue;
-			}
+			// 子字典（如 LayoutGroup 的 padding / CanvasScaler 的 referenceResolution）在 normalize
+			// 识别不出具体形态时，才递归写入现有子对象，而不是替换它。
+			//
+			// PORT-NOTE: normalize 必须**先于** applyNested 执行。normalize 里的 ColorBlock
+			// （`m_NormalColor`->`normalColor`）、RectOffset（`m_Left`->`left`）、SpriteState / Navigation
+			// 是**专用名字映射**：它们按 Unity 序列化名取数据，而 applyNested 是按 Haxe 字段名做
+			// `hasField(target, name)` 匹配的 —— 先走通用递归时这些 Unity 名一个都匹配不上，
+			// 于是字段被**静默丢弃**（实测后果：所有 Selectable.colors 恒为声明初值，
+			// normalColor 是不透明白，下拉框条目的背景因此盖住白色文字；所有 LayoutGroup.padding 恒为 0）。
+			// 所以先给 normalize 一次机会：只有它**原样返回 raw**（`==` 对匿名对象是引用比较，
+			// 即没识别出具体形态）时才回退到递归。
+			var canRecurse:Bool = isPlainDict(raw) && isNestedObject(current);
 			var normalized = normalize(raw, current);
 			if (normalized == SKIP)
 				continue;
+			if (canRecurse && normalized == raw) {
+				applyNested(current, raw, ctx);
+				continue;
+			}
 			var value:Dynamic = ctx.decode(normalized, current);
 			if (value == null && current != null && isStructField(current)) {
 				// PORT-NOTE: 数据里是 null 而字段当前是非 null 的结构体时，保持原值不动 ——
@@ -123,7 +133,9 @@ class ScenePrefabFieldApplier {
 	 * 这是 `ScenePrefabLoader.InstantiateScene("Level")` 段错误的第一处（见
 	 * `tools_build/scene_pipeline_work.md` §2）。
 	 *
-	 * 返回 `SKIP` 表示「该字段不该写」（保持声明初值）。
+	 * 返回 `SKIP` 表示「该字段不该写」（保持声明初值）；返回 `raw` **本身**（同一引用）表示
+	 * 「没识别出具体形态」，调用方据此决定是否回退到通用递归 —— 见 Apply / applyNested 里的
+	 * PORT-NOTE（normalize 必须先于 applyNested）。
 	 */
 	static function normalize(raw:Dynamic, current:Dynamic):Dynamic {
 		if (raw == null)
@@ -311,13 +323,18 @@ class ScenePrefabFieldApplier {
 				continue;
 			var raw:Dynamic = Reflect.field(fields, name);
 			var current:Dynamic = getField(target, name);
-			if (isPlainDict(raw) && isNestedObject(current)) {
-				applyNested(current, raw, ctx);
-				continue;
-			}
+			// PORT-NOTE: 与 Apply 保持完全一致的顺序语义 —— normalize 先跑，只有它**原样返回 raw**
+			// （`==` 是引用比较，即没识别出 ColorBlock/RectOffset/SpriteState/Navigation 这类专用映射）
+			// 时才回退到「通用递归写子对象」。反过来先递归的话，专用名字映射（Unity 序列化名 -> Haxe
+			// 字段名）会被通用递归按 Haxe 名匹配、全部落空而静默丢弃。
+			var canRecurse:Bool = isPlainDict(raw) && isNestedObject(current);
 			var normalized = normalize(raw, current);
 			if (normalized == SKIP)
 				continue;
+			if (canRecurse && normalized == raw) {
+				applyNested(current, raw, ctx);
+				continue;
+			}
 			var value:Dynamic = ctx.decode(normalized, current);
 			if (value == null && current != null && isStructField(current))
 				continue;

@@ -3,6 +3,7 @@ package mvz2.localization;
 
 import tmpro.TextMeshProUGUI;
 import unity.Component;  // UNKNOWNIMPORT
+import unity.UnityObject;
 import tools.ObjectExtensions;
 
 // [RequireComponent(typeof(TextMeshProUGUI))]
@@ -16,7 +17,7 @@ class TextMeshProUGUITranslator extends TranslateComponentText<TextMeshProUGUI> 
     }
     override private function Translate(language:String):Void {
         super.Translate(language);
-        if (!Component.Exists())
+        if (!UnityObject.exists(Component))
             return;
         // PORT-NOTE: Haxe 无 StringTools.isBlank，等价于 C# string.IsNullOrWhiteSpace。
         if (Context != null && StringTools.trim(Context).length > 0)

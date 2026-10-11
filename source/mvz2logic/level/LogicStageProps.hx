@@ -88,7 +88,7 @@ class LogicStageProps
 	//endregion
 
 	//region 无尽模式
-	public static var ENDLESS:PropertyMeta<Bool> = Get("endless");
+	public static var ENDLESS:PropertyMeta<Bool> = Get("endless", false);
 	public static function IsEndlessOfStage(stage:StageDefinition):Bool
 	{
 		return stage.GetProperty(ENDLESS);
@@ -100,7 +100,7 @@ class LogicStageProps
 	//endregion
 
 	//region 我是僵尸模式
-	public static var I_ZOMBIE:PropertyMeta<Bool> = Get("iZombie");
+	public static var I_ZOMBIE:PropertyMeta<Bool> = Get("iZombie", false);
 	public static function IsIZombieOfStage(stage:StageDefinition):Bool
 	{
 		return stage.GetProperty(I_ZOMBIE);
@@ -116,7 +116,7 @@ class LogicStageProps
 	//endregion
 
 	//region 冒险模式
-	public static var ADVENTURE:PropertyMeta<Bool> = Get("adventure");
+	public static var ADVENTURE:PropertyMeta<Bool> = Get("adventure", false);
 	public static function IsAdventure(level:LevelEngine):Bool
 	{
 		return level.GetProperty(ADVENTURE);
@@ -128,7 +128,7 @@ class LogicStageProps
 	//endregion
 
 	//region Boss复仇模式
-	public static var BOSS_REVENGE:PropertyMeta<Bool> = Get("boss_revenge");
+	public static var BOSS_REVENGE:PropertyMeta<Bool> = Get("boss_revenge", false);
 	public static function IsBossRevenge(level:LevelEngine):Bool
 	{
 		return level.GetProperty(BOSS_REVENGE);
@@ -140,7 +140,7 @@ class LogicStageProps
 	//endregion
 
 	//region 关卡天数
-	public static var DAY_NUMBER:PropertyMeta<Int> = Get("dayNumber");
+	public static var DAY_NUMBER:PropertyMeta<Int> = Get("dayNumber", 0);
 	public static function GetDayNumber(level:LevelEngine):Int
 	{
 		return level.GetProperty(DAY_NUMBER);
@@ -193,7 +193,7 @@ class LogicStageProps
 
 	//region 需要选卡
 
-	public static var NEED_BLUEPRINTS:PropertyMeta<Bool> = Get("needBlueprints");
+	public static var NEED_BLUEPRINTS:PropertyMeta<Bool> = Get("needBlueprints", false);
 	public static function SetNeedBlueprints(stage:StageDefinition, value:Bool):Void
 	{
 		stage.SetProperty(NEED_BLUEPRINTS, value);
@@ -205,7 +205,7 @@ class LogicStageProps
 	//endregion
 
 	//region 无开场对话音乐
-	public static var NO_START_TALK_MUSIC:PropertyMeta<Bool> = Get("noStartTalkMusic");
+	public static var NO_START_TALK_MUSIC:PropertyMeta<Bool> = Get("noStartTalkMusic", false);
 	public static function NoStartTalkMusic(game:LevelEngine):Bool
 	{
 		return game.GetProperty(NO_START_TALK_MUSIC);
@@ -226,9 +226,9 @@ class LogicStageProps
 	//endregion
 
 	//region 波次
-	public static var WAVE_MAX_TIME:PropertyMeta<Float> = Get("waveMaxTime");
-	public static var WAVE_ADVANCE_TIME:PropertyMeta<Float> = Get("waveAdvanceTime");
-	public static var WAVE_ADVANCE_HEALTH_PERCENT:PropertyMeta<Float> = Get("waveAdvanceHealthPercent");
+	public static var WAVE_MAX_TIME:PropertyMeta<Float> = Get("waveMaxTime", 0.0);
+	public static var WAVE_ADVANCE_TIME:PropertyMeta<Float> = Get("waveAdvanceTime", 0.0);
+	public static var WAVE_ADVANCE_HEALTH_PERCENT:PropertyMeta<Float> = Get("waveAdvanceHealthPercent", 0.0);
 	public static function GetWaveMaxSeconds(level:LevelEngine):Float
 	{
 		return level.GetProperty(WAVE_MAX_TIME);
@@ -244,7 +244,7 @@ class LogicStageProps
 	//endregion
 
 	//region 无能量
-	public static var NO_ENERGY:PropertyMeta<Bool> = Get("noEnergy");
+	public static var NO_ENERGY:PropertyMeta<Bool> = Get("noEnergy", false);
 	public static function IsNoEnergy(game:LevelEngine):Bool
 	{
 		return game.GetProperty(NO_ENERGY);
@@ -256,10 +256,10 @@ class LogicStageProps
 	//endregion
 
 	//region 自动收集
-	public static var AUTO_COLLECT_ALL:PropertyMeta<Bool> = Get("autoCollectAll");
-	public static var AUTO_COLLECT_ENERGY:PropertyMeta<Bool> = Get("autoCollectEnergy");
-	public static var AUTO_COLLECT_MONEY:PropertyMeta<Bool> = Get("autoCollectMoney");
-	public static var AUTO_COLLECT_STARSHARD:PropertyMeta<Bool> = Get("autoCollectStarshard");
+	public static var AUTO_COLLECT_ALL:PropertyMeta<Bool> = Get("autoCollectAll", false);
+	public static var AUTO_COLLECT_ENERGY:PropertyMeta<Bool> = Get("autoCollectEnergy", false);
+	public static var AUTO_COLLECT_MONEY:PropertyMeta<Bool> = Get("autoCollectMoney", false);
+	public static var AUTO_COLLECT_STARSHARD:PropertyMeta<Bool> = Get("autoCollectStarshard", false);
 	public static function IsAutoCollectAll(game:LevelEngine):Bool
 	{
 		return game.GetProperty(AUTO_COLLECT_ALL);
@@ -280,7 +280,7 @@ class LogicStageProps
 
 	//region 开局位置
 	public static var START_TRANSITION:PropertyMeta<String> = Get("startTransition");
-	public static var START_CAMERA_POSITION:PropertyMeta<Int> = Get("startCameraPosition");
+	public static var START_CAMERA_POSITION:PropertyMeta<Int> = Get("startCameraPosition", 0);
 	public static function GetStartTransition(stage:StageDefinition):Null<String>
 	{
 		return stage.GetProperty(START_TRANSITION);
@@ -295,7 +295,7 @@ class LogicStageProps
 	public static var CLEAR_PICKUP_MODEL:PropertyMeta<NamespaceID> = Get("clearPickupModel");
 	public static var CLEAR_PICKUP_CONTENT_ID:PropertyMeta<NamespaceID> = Get("clear_pickup_content_id");
 	public static var CLEAR_SOUND:PropertyMeta<NamespaceID> = Get("clearSound");
-	public static var DROPS_TROPHY:PropertyMeta<Bool> = Get("dropsTrophy");
+	public static var DROPS_TROPHY:PropertyMeta<Bool> = Get("dropsTrophy", false);
 	public static function GetClearPickupModel(level:LevelEngine):Null<NamespaceID>
 	{
 		return level.GetProperty(CLEAR_PICKUP_MODEL);
@@ -319,7 +319,7 @@ class LogicStageProps
 	//endregion
 
 	//region 统计
-	public static var HIDE_IN_STATS:PropertyMeta<Bool> = Get("hide_in_stats");
+	public static var HIDE_IN_STATS:PropertyMeta<Bool> = Get("hide_in_stats", false);
 	public static function HideInStats(entityDef:StageDefinition):Bool
 	{
 		return entityDef.GetProperty(HIDE_IN_STATS);

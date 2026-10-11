@@ -84,6 +84,7 @@ class ConveyorBlueprintController extends RuntimeBlueprintController
 	function set_Position(v:Float):Float return Position = v;
 }
 
+@:rtti
 class SerializableConveyorBlueprintController extends SerializableBlueprintController
 {
 	public var position:Float;

@@ -26,6 +26,7 @@ import pvzengine.modifiers.SetOperator;
 import pvzengine.modifiers.Vector3Modifier;
 import tools.FrameTimer;
 import unity.Vector3;
+import unity.UnityObject;
 import pvzengine.callbacks.LevelCallbacks.EntityDeathParams;
 import mvz2.vanilla.effects.FragmentExt;
 
@@ -54,7 +55,7 @@ class PetrifiedBuff extends BuffDefinition
     {
         super.PostRemove(buff);
         var entity = buff.GetEntity();
-        if (entity != null && entity.Exists())
+        if (entity != null && unity.UnityObject.exists(entity))
         {
             entity.Spawn(VanillaEffectID.petrifiedShards, entity.Position);
             LogicEntityExt.PlaySound(entity, VanillaSoundID.rockCrumble);
@@ -76,7 +77,7 @@ class PetrifiedBuff extends BuffDefinition
             return;
         }
         var entity = buff.GetEntity();
-        if (entity == null || !entity.Exists() || entity.IsDead)
+        if (entity == null || !unity.UnityObject.exists(entity) || entity.IsDead)
         {
             buff.Remove();
             return;

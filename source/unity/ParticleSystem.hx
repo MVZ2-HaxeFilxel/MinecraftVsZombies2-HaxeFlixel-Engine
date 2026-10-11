@@ -116,10 +116,15 @@ class EmissionModule {
         return this.bursts.length;
     }
     public function GetBurst(index:Int):Burst {
-        if (index < 0 || index >= bursts.length) bursts[index] = new Burst();
-        return bursts[index];
+        if (index < 0 || index >= bursts.length) return null;
+        var b = bursts[index];
+        if (b == null) { b = new Burst(); bursts[index] = b; }
+        return b;
     }
-    public function SetBurst(index:Int, burst:Burst):Void bursts[index] = burst;
+    public function SetBurst(index:Int, burst:Burst):Void {
+        if (index < 0 || index >= bursts.length) return;
+        bursts[index] = burst;
+    }
     public function SetBurstsArray(bursts:Array<Burst>):Void this.bursts = bursts;
 }
 

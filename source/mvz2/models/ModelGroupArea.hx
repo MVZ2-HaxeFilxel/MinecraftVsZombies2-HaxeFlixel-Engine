@@ -15,6 +15,7 @@ class ModelGroupArea extends ModelGroupRenderer
 	// #endregion
 }
 
+@:rtti
 class SerializableModelGroupArea extends SerializableModelGroupRenderer
 {
 	public function new()

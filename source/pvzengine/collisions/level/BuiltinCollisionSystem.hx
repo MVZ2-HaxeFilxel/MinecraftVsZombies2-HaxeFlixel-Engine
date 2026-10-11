@@ -455,6 +455,7 @@ class BuiltinCollisionSystem implements ICollisionSystem
 }
 
 // [Serializable]
+@:rtti
 class SerializableBuiltinCollisionSystem implements ISerializableCollisionSystem
 {
     public function new()

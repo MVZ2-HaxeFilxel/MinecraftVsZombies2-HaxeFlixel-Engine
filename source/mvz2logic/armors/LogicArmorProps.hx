@@ -10,9 +10,9 @@ import pvzengine.armors.ArmorDefinition;
 @:propertyRegistryRegion(PropertyRegions.armor)
 class LogicArmorProps
 {
-	static function Get<T>(name:String):PropertyMeta<T>
+	static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
 	{
-		return new PropertyMeta<T>(name);
+		return new PropertyMeta<T>(name, defaultValue);
 	}
 
 	public static var ARMOR_TYPE:PropertyMeta<NamespaceID> = Get("armor_type");
@@ -26,7 +26,7 @@ class LogicArmorProps
 		armor.SetProperty(ARMOR_TYPE, value);
 	}
 
-	public static var IGNORED:PropertyMeta<Bool> = Get("ignored");
+	public static var IGNORED:PropertyMeta<Bool> = Get("ignored", false);
 	public static function IsIgnoredArmorDefinition(armor:ArmorDefinition):Bool
 	{
 		return armor.GetProperty(IGNORED);

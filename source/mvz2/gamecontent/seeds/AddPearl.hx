@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Seeds/AddPearl.cs
 package mvz2.gamecontent.seeds;
 
+import unity.UnityObject;
 import mvz2.gamecontent.effects.BreakoutBoard;
 import mvz2.gamecontent.effects.VanillaEffectID;
 import mvz2.gamecontent.seeds.VanillaBlueprintID.VanillaBlueprintNames;
@@ -39,7 +40,7 @@ class AddPearl extends SeedOptionDefinition
     }
     function UseLevel(level:LevelEngine):Void
     {
-        var board = level.FindFirstEntity(e -> e.IsEntityOf(VanillaEffectID.breakoutBoard) && (e.Target == null || !e.Target.Exists()));
+        var board = level.FindFirstEntity(e -> e.IsEntityOf(VanillaEffectID.breakoutBoard) && (e.Target == null || !unity.UnityObject.exists(e.Target)));
         if (board == null)
             return;
         BreakoutBoard.SpawnPearl(board);
@@ -48,7 +49,7 @@ class AddPearl extends SeedOptionDefinition
     function IsValid(seedPack:SeedPack):Bool
     {
         var level = seedPack.Level;
-        var board = level.FindFirstEntity(e -> e.IsEntityOf(VanillaEffectID.breakoutBoard) && (e.Target == null || !e.Target.Exists()));
+        var board = level.FindFirstEntity(e -> e.IsEntityOf(VanillaEffectID.breakoutBoard) && (e.Target == null || !unity.UnityObject.exists(e.Target)));
         if (board == null)
             return false;
         return true;

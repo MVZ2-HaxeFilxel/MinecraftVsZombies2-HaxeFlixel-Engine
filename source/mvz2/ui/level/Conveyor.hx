@@ -7,7 +7,7 @@ import unity.Transform;
 import unity.UnityObject;
 import unity.Vector3;
 import unity.ui.Shadow;
-import unity.ui.Shadow.LayoutRebuilder;
+import unity.ui.LayoutRebuilder;
 
 class Conveyor extends BlueprintSet
 {

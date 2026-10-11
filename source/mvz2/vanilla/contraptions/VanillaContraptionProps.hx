@@ -17,7 +17,7 @@ class VanillaContraptionProps
     }
 
     // #region 可攀爬
-    public static var NO_CLIMB:PropertyMeta<Bool> = Get("noClimb");
+    public static var NO_CLIMB:PropertyMeta<Bool> = Get("noClimb", false);
     // C#: extension method NoClimb(this Entity contraption)
     public static function NoClimb(contraption:Entity):Bool
     {
@@ -26,7 +26,7 @@ class VanillaContraptionProps
     // #endregion
 
     // #region 防御性
-    public static var DEFENSIVE:PropertyMeta<Bool> = Get("defensive");
+    public static var DEFENSIVE:PropertyMeta<Bool> = Get("defensive", false);
     // C#: extension method IsDefensive(this Entity contraption)
     public static function IsDefensive(contraption:Entity):Bool
     {
@@ -41,7 +41,7 @@ class VanillaContraptionProps
     // #endregion
 
     // #region 生产者
-    public static var PRODUCER:PropertyMeta<Bool> = Get("producer");
+    public static var PRODUCER:PropertyMeta<Bool> = Get("producer", false);
     // C#: extension method IsProducer(this EntityDefinition contraption)
     public static function IsProducer(contraption:EntityDefinition):Bool
     {
@@ -50,7 +50,7 @@ class VanillaContraptionProps
     // #endregion
 
     // #region 阻挡跳跃
-    public static var BLOCKS_JUMP:PropertyMeta<Bool> = Get("blocksJump");
+    public static var BLOCKS_JUMP:PropertyMeta<Bool> = Get("blocksJump", false);
     // C#: extension method BlocksJump(this Entity contraption)
     public static function BlocksJump(contraption:Entity):Bool
     {
@@ -65,7 +65,7 @@ class VanillaContraptionProps
     // #endregion
 
     // #region 地板器械
-    public static var IS_FLOOR:PropertyMeta<Bool> = Get("isFloor");
+    public static var IS_FLOOR:PropertyMeta<Bool> = Get("isFloor", false);
     // C#: extension method IsFloor(this Entity contraption)
     public static function IsFloor(contraption:Entity):Bool
     {
@@ -89,7 +89,7 @@ class VanillaContraptionProps
     // #endregion
 
     // #region 不能绑架
-    public static var NO_ABDUCTION:PropertyMeta<Bool> = Get("no_abduction");
+    public static var NO_ABDUCTION:PropertyMeta<Bool> = Get("no_abduction", false);
     // C#: extension method IsNoAbduction(this Entity entity)
     public static function IsNoAbduction(entity:Entity):Bool
     {
@@ -98,7 +98,7 @@ class VanillaContraptionProps
     // #endregion
 
     // #region 不能使用吞噬者
-    public static var NO_DEVOURER:PropertyMeta<Bool> = Get("no_devourer");
+    public static var NO_DEVOURER:PropertyMeta<Bool> = Get("no_devourer", false);
     // C#: extension method IsNoDevourer(this Entity entity)
     public static function IsNoDevourer(entity:Entity):Bool
     {

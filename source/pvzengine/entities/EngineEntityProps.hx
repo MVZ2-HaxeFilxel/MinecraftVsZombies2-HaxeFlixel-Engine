@@ -27,7 +27,7 @@ class EngineEntityProps
 	}
 
 	// #region 默认朝左
-	public static var FACE_LEFT_AT_DEFAULT:PropertyMeta<Bool> = Get("faceLeftAtDefault");
+	public static var FACE_LEFT_AT_DEFAULT:PropertyMeta<Bool> = Get("faceLeftAtDefault", false);
 	public static function FaceLeftAtDefault(entity:Entity):Bool
 	{
 		return entity.GetProperty(FACE_LEFT_AT_DEFAULT);
@@ -35,7 +35,7 @@ class EngineEntityProps
 	// #endregion
 
 	// #region 无敌
-	public static var INVINCIBLE:PropertyMeta<Bool> = Get("invincible");
+	public static var INVINCIBLE:PropertyMeta<Bool> = Get("invincible", false);
 	public static function IsInvincible(entity:Entity):Bool
 	{
 		return entity.GetProperty(INVINCIBLE);
@@ -43,7 +43,7 @@ class EngineEntityProps
 	// #endregion
 
 	// #region 重力
-	public static var GRAVITY:PropertyMeta<Float> = Get("gravity");
+	public static var GRAVITY:PropertyMeta<Float> = Get("gravity", 0.0);
 	// PORT-NOTE: C# 重载 GetGravity(this EntityDefinition) / GetGravity(this Entity) 合并。
 	public static function GetGravity(target:Dynamic):Float
 	{
@@ -58,7 +58,7 @@ class EngineEntityProps
 	// #endregion
 
 	// #region 水平翻转
-	public static var FLIP_X:PropertyMeta<Bool> = Get("flipX");
+	public static var FLIP_X:PropertyMeta<Bool> = Get("flipX", false);
 	public static function IsFlipX(entity:Entity):Bool
 	{
 		return entity.GetProperty(FLIP_X);
@@ -136,7 +136,7 @@ class EngineEntityProps
 	// #endregion
 
 	// #region 摩擦力
-	public static var FRICTION:PropertyMeta<Float> = Get("friction");
+	public static var FRICTION:PropertyMeta<Float> = Get("friction", 0.0);
 	public static function GetFriction(entity:Entity):Float
 	{
 		return entity.GetProperty(FRICTION);
@@ -196,7 +196,7 @@ class EngineEntityProps
 	// #endregion
 
 	// #region 阵营
-	public static var FACTION:PropertyMeta<Int> = Get("faction");
+	public static var FACTION:PropertyMeta<Int> = Get("faction", 0);
 	public static function SetFaction(entity:Entity, value:Int):Void
 	{
 		entity.SetProperty(FACTION, value);
@@ -204,7 +204,7 @@ class EngineEntityProps
 	// #endregion
 
 	// #region 地面高度偏移
-	public static var GROUND_LIMIT_OFFSET:PropertyMeta<Float> = Get("groundLimitOffset");
+	public static var GROUND_LIMIT_OFFSET:PropertyMeta<Float> = Get("groundLimitOffset", 0.0);
 	public static function GetGroundLimitOffset(entity:Entity):Float
 	{
 		return entity.GetProperty(GROUND_LIMIT_OFFSET);
@@ -253,7 +253,7 @@ class EngineEntityProps
 	// #endregion
 
 	// #region 最大血量
-	public static var MAX_HEALTH:PropertyMeta<Float> = Get("maxHealth");
+	public static var MAX_HEALTH:PropertyMeta<Float> = Get("maxHealth", 0.0);
 	public static function GetMaxHealth(entity:Entity, ignoreBuffs:Bool = false):Float
 	{
 		return entity.GetProperty(MAX_HEALTH, ignoreBuffs);
@@ -288,7 +288,7 @@ class EngineEntityProps
 	// #endregion
 
 	// #region 碰撞检测
-	public static var COLLISION_DETECTION:PropertyMeta<Int> = Get("collisionDetection");
+	public static var COLLISION_DETECTION:PropertyMeta<Int> = Get("collisionDetection", 0);
 	public static function GetCollisionDetection(entity:Entity):Int
 	{
 		return entity.GetProperty(COLLISION_DETECTION);
@@ -304,7 +304,7 @@ class EngineEntityProps
 	// #endregion
 
 	// #region 碰撞检测样本长度
-	public static var COLLISION_INTERVAL:PropertyMeta<Int> = Get("collision_interval");
+	public static var COLLISION_INTERVAL:PropertyMeta<Int> = Get("collision_interval", 0);
 	public static function GetCollisionInterval(entity:Entity):Int
 	{
 		return entity.GetProperty(COLLISION_INTERVAL);

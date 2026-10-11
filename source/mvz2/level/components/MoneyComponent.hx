@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/MVZ2/Level/Components/MoneyComponent.cs
 package mvz2.level.components;
 
+import unity.UnityObject;
 import mvz2.level.LevelController;
 import mvz2logic.Global;
 import mvz2logic.level.components.ComponentInterfaces.IMoneyComponent;
@@ -62,7 +63,7 @@ class MoneyComponent extends MVZ2Component implements IMoneyComponent
 		var entities:Array<Entity> = [];
 		for (e in delayedMoneyEntities.keys())
 		{
-			if (!e.Exists())
+			if (!unity.UnityObject.exists(e))
 			{
 				entities.push(e);
 			}

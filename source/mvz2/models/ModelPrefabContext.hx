@@ -71,6 +71,15 @@ class ModelPrefabContext {
 					}
 					return out;
 				}
+				// PORT-NOTE: 走到这里 raw 一定是**类实例**（匿名对象走 TObject 分支）。
+				// `ScenePrefabFieldApplier.normalize` 会把 Unity 序列化出来的 dict 归归一成 shim
+				// 类实例（TMP_OptionData / ColorBlock / Navigation / RectOffset / AnimationCurve /
+				// NamespaceIDReference 等）再交给这里解码；此前本分支没有 return，落到下面的
+				// `Reflect.isObject` 分支被逐字段复制成**匿名对象**（拍平），调用方再按类实例
+				// 读字段（option.text / offset.left / curve.keys…）就是未定义行为（疑似启动期
+				// 非确定性段错误的来源）。类实例一律原样返回。
+				if (Type.getClass(raw) != null)
+					return raw;
 			case TObject:
 				// 匿名对象（JSON 解析结果）继续往下走。
 			default:
@@ -83,7 +92,29 @@ class ModelPrefabContext {
 				return resolveRef(n, c);
 			}
 			if (Reflect.hasField(raw, "asset")) {
-				return ModelPrefabAssets.Resolve(cast Reflect.field(raw, "asset"));
+				var resolved = ModelPrefabAssets.Resolve(cast Reflect.field(raw, "asset"));
+				// PORT-NOTE: Prefab 资产引用解析出的是**实例根 GameObject**（Unity 里该字段持有
+				// prefab 资产，Instantiate 才得实例；见 ModelPrefabAssets 的 Prefab 分支）。
+				// 而这类字段的目标类型几乎都是「prefab 根上的主控制器组件」
+				//（LevelController.entityTemplate 要 EntityController，即 Entity.prefab 根上
+				// 第一个 MonoBehaviour）。导出数据不带 Unity fileID，无法精确映射到组件，
+				// 因此按两条规则取组件：字段有默认实例（current）时按类型匹配；
+				// 否则取根上第一个 MonoBehaviour（跳过 Transform）。
+				if (resolved != null && Std.isOfType(resolved, GameObject)) {
+					var go = cast(resolved, GameObject);
+					var wanted = current != null ? Type.getClass(current) : null;
+					if (wanted != null) {
+						var comp = go.GetComponent(wanted);
+						if (comp != null)
+							return comp;
+					} else {
+						for (c in go.GetAllComponents()) {
+							if (c != null && Std.isOfType(c, unity.MonoBehaviour) && !Std.isOfType(c, unity.Transform))
+								return c;
+						}
+					}
+				}
+				return resolved;
 			}
 			if (Reflect.hasField(raw, "t")) {
 				return structFromTag(raw, current);

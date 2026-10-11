@@ -7,8 +7,8 @@ import pvzengine.PropertyRegions;
 @:propertyRegistryRegion(PropertyRegions.buff)
 class VanillaBuffProps
 {
-    private static function Get<T>(name:String):PropertyMeta<T>
+    private static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
     {
-        return new PropertyMeta<T>(name);
+        return new PropertyMeta<T>(name, defaultValue);
     }
 }

@@ -93,6 +93,7 @@ class ModelGroupEntity extends ModelGroupRenderer
 	// #endregion
 }
 
+@:rtti
 class SerializableModelGroupEntity extends SerializableModelGroupRenderer
 {
 	public function new()

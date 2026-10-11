@@ -17,6 +17,7 @@ import pvzengine.entities.EntityCollision;
 import pvzengine.entities.EntityCollisionHelper;
 import pvzengine.entities.EntityTypes;
 import unity.Mathf;
+import unity.UnityObject;
 using mvz2.vanilla.contraptions.VanillaContraptionProps;
 using mvz2.vanilla.detection.Detection;
 using mvz2.vanilla.enemies.VanillaEnemyProps;
@@ -130,7 +131,7 @@ class Spider extends AIEntityBehaviour
     }
     public static function CanClimb(enemy:Entity, target:Entity):Bool
     {
-        if (target == null || !target.Exists() || target.IsDead)
+        if (target == null || !unity.UnityObject.exists(target) || target.IsDead)
             return false;
         if (!enemy.IsHostile(target))
             return false;

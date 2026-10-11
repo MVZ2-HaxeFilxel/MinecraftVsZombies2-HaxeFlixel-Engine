@@ -46,6 +46,7 @@ import tools.FrameTimer;
 import unity.Mathf;
 import unity.Vector2;
 import unity.Vector3;
+import unity.UnityObject;
 using mvz2.vanilla.entities.VanillaEntityExt;
 using mvz2logic.entities.LogicEntityExt;
 import mvz2.gamecontent.effects.VanillaEffectID;
@@ -674,7 +675,7 @@ private class GunState extends EntityStateMachineState
         if (detectTimer != null)
         {
             detectTimer.Run(stateMachine.GetSpeed(entity));
-            if (detectTimer.Expired || entity.Target == null || !entity.Target.Exists())
+            if (detectTimer.Expired || entity.Target == null || !unity.UnityObject.exists(entity.Target))
             {
                 detectTimer.ResetTime(Frankenstein.detectIntervalFrames);
                 entity.Target = Frankenstein.FindGunTarget(entity);
@@ -683,7 +684,7 @@ private class GunState extends EntityStateMachineState
 
         substate = stateMachine.GetSubState(entity);
         // 如果有目标，并且正在开火，则发射子弹
-        if (entity.Target != null && entity.Target.Exists())
+        if (entity.Target != null && unity.UnityObject.exists(entity.Target))
         {
             if (substate == Frankenstein.SUBSTATE_GUN_FIRE)
             {
@@ -795,7 +796,7 @@ private class MissileState extends EntityStateMachineState
                 entity.Target = Frankenstein.FindMissileTarget(entity);
             }
         }
-        if (entity.Target == null || !entity.Target.Exists())
+        if (entity.Target == null || !unity.UnityObject.exists(entity.Target))
         {
             stateMachine.StartState(entity, Frankenstein.STATE_IDLE);
             return;

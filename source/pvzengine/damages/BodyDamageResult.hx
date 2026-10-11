@@ -23,6 +23,7 @@ class BodyDamageResult extends DamageResult
 }
 
 // [Serializable]
+@:rtti
 class SerializableBodyDamageResult extends SerializableDamageResult
 {
     public function new(result:BodyDamageResult)

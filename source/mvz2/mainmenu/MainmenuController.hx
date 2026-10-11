@@ -125,10 +125,14 @@ class MainmenuController extends MainScenePage {
     public function Init():Void {
         var userName = main.SaveManager.GetCurrentUserName();
         if (userName == null || userName.length == 0) {
-            var result:String = main.Scene.ShowInputNameDialogAsync(InputNameType.Initialize).awaitResult();
-            if (result != null && result.length > 0) {
-                RenameUser(main.SaveManager.GetCurrentUserIndex(), result);
-            }
+            main.Scene.ShowInputNameDialogAsync(InputNameType.Initialize).awaitResult();
+            // PORT-NOTE: awaitResult 是同步直通（见 system/threading/tasks/Task.hx），
+            // 拿不到玩家在对话框里的输入；原样移植 result 恒为 null，流程跳过改名，
+            // 用户名一直是空 —— 进关卡后的存档读取会把空名当损坏。同步模型的等价改法：
+            // 以默认名补上并收起对话框（原版此处弹 InputNameDialog 等玩家输入）。
+            // TODO-PORT: Task.awaitResult 协程化后还原为读取玩家输入。
+            main.Scene.HideInputNameDialog();
+            RenameUser(main.SaveManager.GetCurrentUserIndex(), mvz2.scenes.GameEntrance.DEFAULT_NEW_USERNAME);
         }
         ui.SetRayblockerActive(false);
     }

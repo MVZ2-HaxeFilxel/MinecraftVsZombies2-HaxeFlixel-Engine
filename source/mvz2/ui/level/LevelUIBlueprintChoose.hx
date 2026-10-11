@@ -14,7 +14,9 @@ import mvz2.ui.Blueprint;
 import mvz2.ui.ElementListUI;
 import mvz2logic.inputs.PointerInteraction;
 import unity.Animator;
+import unity.Debug;
 import unity.GameObject;
+import unity.Transform;
 import unity.RectTransform;
 import unity.UnityObject;
 import unity.Vector3;
@@ -224,30 +226,91 @@ class LevelUIBlueprintChoose extends unity.MonoBehaviour
 
 	private function Awake():Void
 	{
-		viewLawnReturnButton.onClick.AddListener(() -> OnViewLawnReturnClick.dispatch());
+		// PORT-NOTE: `artifactRepickButton` 在原工程里指向 ArtifactSlots 嵌套 prefab 内的
+		// RefreshButton（UIPresetStandalone.prefab:3911 的 objectReference 指向
+		// ArtifactSlots.prefab 的 stripped MonoBehaviour）。导出器不展开嵌套 prefab 实例的
+		// stripped 引用，字段恒为 null（Level.json 的 danglingRefs=641 之一），直接订阅就空引用。
+		// 这里在移植层按 Unity 的等价关系补绑定：从 artifactSlotsRoot 子树找 RefreshButton。
+		if (artifactRepickButton == null)
+			artifactRepickButton = findButtonInSubtree(artifactSlotsRoot, "RefreshButton");
+		if (artifactRepickButton == null)
+			unity.Debug.LogWarning('[LevelUIBlueprintChoose] artifactRepickButton 补绑定失败（子树上找不到 RefreshButton）');
 
-		artifactRepickButton.onClick.AddListener(() -> OnArtifactRepickButtonClick.dispatch());
+		// PORT-NOTE: 其余字段若因导出丢引用而为 null，跳过订阅并告警 —— Unity 里这些字段
+		// 都非 null，空引用会让整个关卡场景加载失败（首 run 点冒险即崩的根因）。
+		unity.Debug.Log('[Awake诊断] 步骤1 补绑定后 artifactRepickButton=' + (artifactRepickButton == null ? "null" : "ok"));
+		if (viewLawnReturnButton != null)
+			viewLawnReturnButton.onClick.AddListener(() -> OnViewLawnReturnClick.dispatch());
+		else
+			unity.Debug.LogWarning('[LevelUIBlueprintChoose] viewLawnReturnButton 为空，跳过订阅');
 
-		artifactChoosingDialog.OnItemClicked.add(index -> OnArtifactChoosingItemClicked.dispatch(index));
-		artifactChoosingDialog.OnItemPointerEnter.add(index -> OnArtifactChoosingItemEnter.dispatch(index));
-		artifactChoosingDialog.OnItemPointerExit.add(index -> OnArtifactChoosingItemExit.dispatch(index));
-		artifactChoosingDialog.OnBackButtonClicked.add(() -> OnArtifactChoosingBackClicked.dispatch());
+		unity.Debug.Log('[Awake诊断] 步骤2 viewLawnReturnButton 订阅完');
+		if (artifactRepickButton != null)
+			artifactRepickButton.onClick.AddListener(() -> OnArtifactRepickButtonClick.dispatch());
 
-		blueprintChoosePanel.OnStartButtonClick.add(() -> OnStartClick.dispatch());
-		blueprintChoosePanel.OnViewLawnButtonClick.add(() -> OnViewLawnClick.dispatch());
-		blueprintChoosePanel.OnRepickButtonClick.add(() -> OnRepickClick.dispatch());
-		blueprintChoosePanel.OnCancelButtonClick.add(() -> OnCancelChooseClick.dispatch());
-		blueprintChoosePanel.OnCommandBlockBlueprintPointerInteraction.add((e, i) -> OnCommandBlockPointerInteraction.dispatch(e, i));
-		blueprintChoosePanel.OnCommandBlockBlueprintSelect.add(e -> OnCommandBlockSlotSelect.dispatch(e));
-		blueprintChoosePanel.OnBlueprintPointerInteraction.add((index, data, i) -> OnBlueprintItemPointerInteraction.dispatch(index, data, i, false));
-		blueprintChoosePanel.OnBlueprintSelect.add((index, data) -> OnBlueprintItemSelect.dispatch(index, data, false));
+		unity.Debug.Log('[Awake诊断] 步骤3 artifactRepickButton 订阅完');
+		if (artifactChoosingDialog != null) {
+			artifactChoosingDialog.OnItemClicked.add(index -> OnArtifactChoosingItemClicked.dispatch(index));
+			artifactChoosingDialog.OnItemPointerEnter.add(index -> OnArtifactChoosingItemEnter.dispatch(index));
+			artifactChoosingDialog.OnItemPointerExit.add(index -> OnArtifactChoosingItemExit.dispatch(index));
+			artifactChoosingDialog.OnBackButtonClicked.add(() -> OnArtifactChoosingBackClicked.dispatch());
+		} else
+			unity.Debug.LogWarning('[LevelUIBlueprintChoose] artifactChoosingDialog 为空，跳过订阅');
 
-		commandBlockChoosePanel.OnCancelButtonClick.add(() -> OnCommandBlockPanelCancelClick.dispatch());
-		commandBlockChoosePanel.OnBlueprintPointerInteraction.add((index, data, i) -> OnBlueprintItemPointerInteraction.dispatch(index, data, i, true));
-		commandBlockChoosePanel.OnBlueprintSelect.add((index, data) -> OnBlueprintItemSelect.dispatch(index, data, true));
+		unity.Debug.Log('[Awake诊断] 步骤4 artifactChoosingDialog 订阅完');
+		if (blueprintChoosePanel != null) {
+			blueprintChoosePanel.OnStartButtonClick.add(() -> OnStartClick.dispatch());
+			blueprintChoosePanel.OnViewLawnButtonClick.add(() -> OnViewLawnClick.dispatch());
+			blueprintChoosePanel.OnRepickButtonClick.add(() -> OnRepickClick.dispatch());
+			blueprintChoosePanel.OnCancelButtonClick.add(() -> OnCancelChooseClick.dispatch());
+			blueprintChoosePanel.OnCommandBlockBlueprintPointerInteraction.add((e, i) -> OnCommandBlockPointerInteraction.dispatch(e, i));
+			blueprintChoosePanel.OnCommandBlockBlueprintSelect.add(e -> OnCommandBlockSlotSelect.dispatch(e));
+			blueprintChoosePanel.OnBlueprintPointerInteraction.add((index, data, i) -> OnBlueprintItemPointerInteraction.dispatch(index, data, i, false));
+			blueprintChoosePanel.OnBlueprintSelect.add((index, data) -> OnBlueprintItemSelect.dispatch(index, data, false));
+		} else
+			unity.Debug.LogWarning('[LevelUIBlueprintChoose] blueprintChoosePanel 为空，跳过订阅');
 
-		choosingViewAlmanacButton.onClick.AddListener(() -> OnViewAlmanacClick.dispatch());
-		choosingViewStoreButton.onClick.AddListener(() -> OnViewStoreClick.dispatch());
+		unity.Debug.Log('[Awake诊断] 步骤5 blueprintChoosePanel 订阅完');
+		if (commandBlockChoosePanel != null) {
+			commandBlockChoosePanel.OnCancelButtonClick.add(() -> OnCommandBlockPanelCancelClick.dispatch());
+			commandBlockChoosePanel.OnBlueprintPointerInteraction.add((index, data, i) -> OnBlueprintItemPointerInteraction.dispatch(index, data, i, true));
+			commandBlockChoosePanel.OnBlueprintSelect.add((index, e) -> OnCommandBlockSlotSelect.dispatch(e));
+		} else
+			unity.Debug.LogWarning('[LevelUIBlueprintChoose] commandBlockChoosePanel 为空，跳过订阅');
+
+		unity.Debug.Log('[Awake诊断] 步骤6 commandBlockChoosePanel 订阅完');
+		if (choosingViewAlmanacButton != null)
+			choosingViewAlmanacButton.onClick.AddListener(() -> OnViewAlmanacClick.dispatch());
+		else
+			unity.Debug.LogWarning('[LevelUIBlueprintChoose] choosingViewAlmanacButton 为空，跳过订阅');
+		if (choosingViewStoreButton != null)
+			choosingViewStoreButton.onClick.AddListener(() -> OnViewStoreClick.dispatch());
+		else
+			unity.Debug.LogWarning('[LevelUIBlueprintChoose] choosingViewStoreButton 为空，跳过订阅');
+	}
+
+	/** 在 root 子树里按名字找 GameObject 上的 Button（找不到返回 null）。 */
+	private function findButtonInSubtree(root:Null<GameObject>, name:String):Null<unity.ui.Button> {
+		if (root == null || root.transform == null)
+			return null;
+		var found:Null<unity.ui.Button> = null;
+		var stack:Array<Transform> = [root.transform];
+		var guard = 0;
+		while (stack.length > 0 && guard++ < 512) {
+			var tr = stack.pop();
+			if (tr == null || tr.gameObject == null)
+				continue;
+			if (tr.gameObject.name == name) {
+				var btn = tr.gameObject.GetComponent(unity.ui.Button);
+				if (btn != null) {
+					found = btn;
+					break;
+				}
+			}
+			for (c in tr.children)
+				stack.push(c);
+		}
+		return found;
 	}
 	public function UpdateFrame(deltaTime:Float):Void
 	{

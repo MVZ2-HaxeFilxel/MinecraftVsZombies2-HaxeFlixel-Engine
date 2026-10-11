@@ -10,6 +10,7 @@ import pvzengine.level.LevelEngine;
 using pvzengine.buffs.BuffTargetExt;
 
 // abstract
+@:rtti
 class BuffReference
 {
 	public function new(buffId:Int64)
@@ -31,6 +32,7 @@ class BuffReference
 	public var buffId:Int64;
 }
 
+@:rtti
 class BuffReferenceEntity extends BuffReference
 {
 	public function new(id:Int64, buffId:Int64)
@@ -45,6 +47,7 @@ class BuffReferenceEntity extends BuffReference
 	public var entityID:Int64;
 }
 
+@:rtti
 class BuffReferenceArmor extends BuffReference
 {
 	public function new(id:Int64, armorSlot:NamespaceID, buffId:Int64)
@@ -62,6 +65,7 @@ class BuffReferenceArmor extends BuffReference
 	public var armorSlot:NamespaceID;
 }
 
+@:rtti
 class BuffReferenceLevel extends BuffReference
 {
 	public function new(buffId:Int64)
@@ -75,6 +79,7 @@ class BuffReferenceLevel extends BuffReference
 }
 
 // abstract
+@:rtti
 class BuffReferenceSeedPack extends BuffReference
 {
 	public function new(seedId:Int64, buffId:Int64)
@@ -85,6 +90,7 @@ class BuffReferenceSeedPack extends BuffReference
 	public var seedID:Int64;
 }
 
+@:rtti
 class BuffReferenceClassicSeedPack extends BuffReferenceSeedPack
 {
 	public function new(seedId:Int64, buffId:Int64)
@@ -97,6 +103,7 @@ class BuffReferenceClassicSeedPack extends BuffReferenceSeedPack
 	}
 }
 
+@:rtti
 class BuffReferenceConveyorSeedPack extends BuffReferenceSeedPack
 {
 	public function new(seedId:Int64, buffId:Int64)
@@ -109,6 +116,7 @@ class BuffReferenceConveyorSeedPack extends BuffReferenceSeedPack
 	}
 }
 
+@:rtti
 class BuffReferenceLawnGrid extends BuffReference
 {
 	public function new(gridIndex:Int, buffId:Int64)

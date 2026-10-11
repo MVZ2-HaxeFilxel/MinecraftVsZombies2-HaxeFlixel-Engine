@@ -10,6 +10,7 @@ import pvzengine.level.ISerializableSourceReference;
 import pvzengine.level.LevelEngine;
 using mvz2logic.level.LogicLevelExt;
 
+@:rtti
 class ArtifactSourceReference implements ILevelSourceReference
 {
 	// PORT-NOTE: C# 有三个构造函数 (long,NamespaceID) / (Artifact) / (LevelEngine, SerializableArtifactSourceReference)，
@@ -84,6 +85,7 @@ class ArtifactSourceReference implements ILevelSourceReference
 }
 
 // [Serializable]
+@:rtti
 class SerializableArtifactSourceReference implements ISerializableSourceReference
 {
 	public var definitionID:NamespaceID;

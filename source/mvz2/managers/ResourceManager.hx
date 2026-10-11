@@ -80,6 +80,7 @@ import unity.networking.UnityWebRequest.Result;
 import unity.networking.UnityWebRequest;
 import Main;
 import unity.Coroutine.CoroutineContext;
+import unity.UnityObject;
 import mvz2.io.XMLHelper;
 import system.io.MemoryStream;
 // PORT-NOTE: C# 的扩展方法在 Haxe 中需显式 using 才能以 `obj.Method()` 形式调用。
@@ -446,6 +447,13 @@ class ResourceManager extends MonoBehaviour
 		// TODO-PORT: 并发加载在 Haxe 中没有等价实现。
 		for (loc in locations)
 		{
+			// PORT-NOTE(防段错误): 移植层部分清单条目没有 PrimaryKey（坏条目/未还原资产），
+			// 直接传给 NamespaceID.Parse 会 null.indexOf 段错误；按缺失跳过。
+			if (loc == null || loc.PrimaryKey == null)
+			{
+				Debug.LogWarning('资源定位符为空或缺少 PrimaryKey，跳过。');
+				continue;
+			}
 			// PORT-NOTE: C# 是 `Addressables.LoadAssetAsync<T>(loc)`（按定位符加载具体文件；同一个
 			// address 可能有多条定位符，如 mvz2:castle 的 areamodel/mapmodel）。Haxe 泛型在运行期无类型
 			// 信息，T 由调用方的变量类型标注固定为 Dynamic；定位符本身继续按位置传入，避免按地址取歧义。
@@ -1415,11 +1423,11 @@ class ResourceManager extends MonoBehaviour
 					var sprite:Sprite = null;
 					if (meta.Shot)
 					{
-						// TODO-PORT: C# 的 `sprite.Exists()` 是 Unity 隐式 bool 转换（判断非 null 且对象未被销毁），
-						// Haxe 侧以 null 判断代替，见 unity.Sprite.Exists()。
+						// TODO-PORT: C# 的 `unity.UnityObject.exists(sprite)` 是 Unity 隐式 bool 转换（判断非 null 且对象未被销毁），
+						// Haxe 侧以 null 判断代替，见 unity.UnityObject.exists(unity.Sprite)。
 						sprite = main.ModelManager.ShotIcon(metaID, meta.Width, meta.Height, new Vector2(meta.XOffset, meta.YOffset), metaID.toString());
 					}
-					if (!sprite.Exists())
+					if (!unity.UnityObject.exists(sprite))
 					{
 						sprite = GetDefaultSpriteClone();
 					}
@@ -1883,7 +1891,7 @@ class ResourceManager extends MonoBehaviour
 				if (entry.name == null || entry.name == "")
 					continue;
 				var sprite = entry.sprite;
-				if (!sprite.Exists())
+				if (!unity.UnityObject.exists(sprite))
 					continue;
 				var id = new NamespaceID(modNamespace, entry.name);
 				modResource.Sprites.set(entry.name, sprite);

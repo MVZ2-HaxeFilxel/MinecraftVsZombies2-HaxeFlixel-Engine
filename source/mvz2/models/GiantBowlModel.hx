@@ -6,6 +6,7 @@ import tools.ObjectExtensions;
 import unity.Mathf;
 import unity.Vector2;
 import unity.Vector3;
+import unity.UnityObject;
 
 class GiantBowlModel extends ModelComponent {
     public function new() {
@@ -24,7 +25,7 @@ class GiantBowlModel extends ModelComponent {
         var radius = Mathf.Lerp(minRadius, maxRadius, radial);
         for (i in 0...count) {
             var point = pointList.getElement(i);
-            if (!point.Exists())
+            if (!unity.UnityObject.exists(point))
                 continue;
 
             var off2D = Vector2.up.RotateClockwise(angle + i * (360 / count)) * radius;

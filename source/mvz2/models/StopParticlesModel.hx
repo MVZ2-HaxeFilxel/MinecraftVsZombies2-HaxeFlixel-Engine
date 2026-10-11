@@ -4,6 +4,7 @@ package mvz2.models;
 import tools.ObjectExtensions;
 import unity.ParticleSystemStopBehavior;  // UNKNOWNIMPORT
 import unity.ParticleSystem;
+import unity.UnityObject;
 
 class StopParticlesModel extends ModelComponent {
     public function new() {
@@ -15,7 +16,7 @@ class StopParticlesModel extends ModelComponent {
         var stopped:Bool = Model.GetProperty("ParticleStopped");
         if (stopped && particles != null) {
             for (particle in particles) {
-                if (particle == null || !particle.Exists() || !particle.Particles.isPlaying)
+                if (particle == null || !unity.UnityObject.exists(particle) || !particle.Particles.isPlaying)
                     continue;
                 particle.Particles.Stop(false, ParticleSystemStopBehavior.StopEmitting);
             }

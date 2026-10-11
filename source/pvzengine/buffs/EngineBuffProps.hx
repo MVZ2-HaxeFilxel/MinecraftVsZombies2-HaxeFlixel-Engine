@@ -13,13 +13,13 @@ import pvzengine.PropertyRegions;
 @:propertyRegistryRegion(PropertyRegions.buff)
 class EngineBuffProps
 {
-	private static function Get<T>(name:String):PropertyMeta<T>
+	private static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
 	{
-		return new PropertyMeta<T>(name);
+		return new PropertyMeta<T>(name, defaultValue);
 	}
 
 	// #region 清晰度
-	public static var BUFF_LEVEL:PropertyMeta<Int> = Get("clarity");
+	public static var BUFF_LEVEL:PropertyMeta<Int> = Get("clarity", 0);
 	public static function GetClarity(buff:Buff):Int
 	{
 		return buff.GetProperty(BUFF_LEVEL);
@@ -27,7 +27,7 @@ class EngineBuffProps
 	// #endregion
 
 	// #region 极性
-	public static var POLARITY:PropertyMeta<Int> = Get("polarity");
+	public static var POLARITY:PropertyMeta<Int> = Get("polarity", 0);
 	public static function IsPolarity(entity:Buff):Int
 	{
 		return entity.GetProperty(POLARITY);

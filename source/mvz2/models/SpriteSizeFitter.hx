@@ -6,6 +6,7 @@ import unity.Mathf;
 import unity.SpriteRenderer;
 import unity.Vector2;
 import unity.Vector3;
+import unity.UnityObject;
 
 // [ExecuteAlways]
 // [RequireComponent(typeof(SpriteRenderer))]
@@ -17,7 +18,7 @@ class SpriteSizeFitter extends ModelComponent {
     override public function UpdateFrame(deltaTime:Float):Void {
         super.UpdateFrame(deltaTime);
         var renderer = Renderer;
-        if (!renderer.Exists())
+        if (!unity.UnityObject.exists(renderer))
             return;
         var spr = renderer.sprite;
         if (spr == null)

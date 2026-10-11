@@ -7,6 +7,7 @@ import mvz2.managers.MainManager;
 import tools.ObjectExtensions;
 import unity.ParticleSystem;
 import unity.Sprite;
+import unity.UnityObject;
 
 // [RequireComponent(typeof(ParticleSystem))]
 class ParticleTextureTranslator extends TranslateComponentSpriteMultiple<ParticleSystem> {
@@ -15,7 +16,7 @@ class ParticleTextureTranslator extends TranslateComponentSpriteMultiple<Particl
     }
 
     override private function GetKeysInner():Array<Sprite> {
-        if (!Component.Exists())
+        if (!UnityObject.exists(Component))
             return null;
         var part = Component.textureSheetAnimation;
         var sprites = new Array<Sprite>();
@@ -27,7 +28,7 @@ class ParticleTextureTranslator extends TranslateComponentSpriteMultiple<Particl
     }
     override private function Translate(language:String):Void {
         super.Translate(language);
-        if (!Component.Exists())
+        if (!UnityObject.exists(Component))
             return;
         var part = Component.textureSheetAnimation;
         var sprites = Keys;

@@ -105,36 +105,36 @@ class OptionsDialogMainPage extends unity.MonoBehaviour
 	// #endregion
 
 	// #region 生命周期
+	// PORT-NOTE: 导出数据里 `musicSlider` / `fastForwardSlider` / `pauseOnFocusLostToggle` 的注入值
+	// 本来就是 null（见 assets/scene_prefabs/**/OptionsDialog*.json），其余引用也可能因导出/注入
+	// 失败而缺失。hxcpp release 下空引用是访问违例（`try/catch` 抓不到），因此这里**逐项判空**后
+	// 才登记：缺引用的控件只是不参与事件分发，而不是让 Awake 在第一处解引用上崩掉。
 	private function Awake():Void
 	{
-		sliderDict.set(SliderType.Music, musicSlider);
-		sliderDict.set(SliderType.Sound, soundSlider);
-		sliderDict.set(SliderType.FastForward, fastForwardSlider);
+		addSlider(SliderType.Music, musicSlider);
+		addSlider(SliderType.Sound, soundSlider);
+		addSlider(SliderType.FastForward, fastForwardSlider);
 
 		// 1-1
-		toggleDict.set(ToggleType.SwapTrigger, swapTriggerToggle);
+		addToggle(ToggleType.SwapTrigger, swapTriggerToggle);
 
 		// 1-2
-		toggleDict.set(ToggleType.PauseOnFocusLost, pauseOnFocusLostToggle);
+		addToggle(ToggleType.PauseOnFocusLost, pauseOnFocusLostToggle);
 
 		// 2-1
-		textButtonDict.set(TextButtonType.MoreOptions, moreOptionsButton);
-		buttonDict.set(ButtonType.MoreOptions, moreOptionsButton.Button);
+		addButton(TextButtonType.MoreOptions, ButtonType.MoreOptions, moreOptionsButton);
 
 		// 2-2
-		textButtonDict.set(TextButtonType.Difficulty, diffcultyButton);
-		textButtonDict.set(TextButtonType.Restart, restartButton);
-		buttonDict.set(ButtonType.Difficulty, diffcultyButton.Button);
-		buttonDict.set(ButtonType.Restart, restartButton.Button);
+		addButton(TextButtonType.Difficulty, ButtonType.Difficulty, diffcultyButton);
+		addButton(TextButtonType.Restart, ButtonType.Restart, restartButton);
 
 		// 3-1
-		textButtonDict.set(TextButtonType.LeaveLevel, leaveLevelButton);
-		buttonDict.set(ButtonType.LeaveLevel, leaveLevelButton.Button);
+		addButton(TextButtonType.LeaveLevel, ButtonType.LeaveLevel, leaveLevelButton);
 
 		// 3-2
-		textButtonDict.set(TextButtonType.Back, backButton);
-		buttonDict.set(ButtonType.Back, backButton.Button);
+		addButton(TextButtonType.Back, ButtonType.Back, backButton);
 
+		// PORT-NOTE: 三个字典此刻只含「引用完整」的项，下面的订阅循环可以安全解引用。
 		for (type in sliderDict.keys())
 		{
 			var capturedType = type;
@@ -153,12 +153,41 @@ class OptionsDialogMainPage extends unity.MonoBehaviour
 			var capturedType = type;
 			toggleDict.get(type).Toggle.onValueChanged.AddListener((v) -> OnToggleValueChanged.dispatch(capturedType, v));
 		}
+		if (!UnityObject.exists(gameObject))
+			return;
 		var tooltipHandlers = gameObject.GetComponentsInChildren(TooltipHandler, true);
 		for (handler in tooltipHandlers)
 		{
+			if (handler == null)
+				continue;
 			handler.OnPointerEnterSignal.add(OnTooltipHandlerPointerEnterCallback);
 			handler.OnPointerExitSignal.add(OnTooltipHandlerPointerExitCallback);
 		}
+	}
+
+	/** 登记滑动条：缺引用或内部 Slider 缺失时不登记（登记后订阅/取 value 处必然解引用它）。 */
+	private function addSlider(type:SliderType, slider:TextSlider):Void
+	{
+		if (slider == null || slider.Slider == null)
+			return;
+		sliderDict.set(type, slider);
+	}
+	/** 登记按钮：文本字典要求 Text 存在（`SetButtonText` 解引用它），按钮字典要求 Button 存在。 */
+	private function addButton(textType:TextButtonType, buttonType:ButtonType, textButton:TextButton):Void
+	{
+		if (textButton == null)
+			return;
+		if (textButton.Text != null)
+			textButtonDict.set(textType, textButton);
+		if (textButton.Button != null)
+			buttonDict.set(buttonType, textButton.Button);
+	}
+	/** 登记开关：缺引用或内部 Toggle 缺失时不登记。 */
+	private function addToggle(type:ToggleType, toggle:LabeledToggle):Void
+	{
+		if (toggle == null || toggle.Toggle == null)
+			return;
+		toggleDict.set(type, toggle);
 	}
 	// #endregion
 
@@ -175,8 +204,14 @@ class OptionsDialogMainPage extends unity.MonoBehaviour
 
 	private function UpdateWidgetAreas():Void
 	{
+		// PORT-NOTE: widgetAreas 无声明初值；prefab 数据缺该字段时为 null，
+		// 而 hxcpp 上遍历 null 数组会直接崩（不是 Haxe 异常），故判空后直接返回。
+		if (widgetAreas == null)
+			return;
 		for (line in widgetAreas)
 		{
+			if (line == null || line.gameObject == null)
+				continue;
 			var hasActiveChild = HasAnyChildrenElement(line);
 			line.gameObject.SetActive(hasActiveChild);
 		}
@@ -186,7 +221,7 @@ class OptionsDialogMainPage extends unity.MonoBehaviour
 		for (i in 0...parent.childCount)
 		{
 			var child = parent.GetChild(i);
-			if (child == null || !child.gameObject.activeSelf)
+			if (child == null || child.gameObject == null || !child.gameObject.activeSelf)
 				continue;
 			if (child.GetComponent(IOptionsDialogElement) != null)
 			{

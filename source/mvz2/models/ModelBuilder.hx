@@ -8,6 +8,7 @@ import tools.ObjectExtensions;
 import unity.Camera;
 import unity.GameObject;
 import unity.Transform;
+import unity.UnityObject;
 using pvzengine.PropertyKeyHelper;  // EXTUSING
 
 class ModelBuilder implements IModelBuilder {
@@ -26,7 +27,7 @@ class ModelBuilder implements IModelBuilder {
             return null;
         var model:Model = null;
         var prefab = res.GetModel(modelMeta.Path);
-        // PORT-NOTE: C# 的 `prefab.Exists()` 是 Unity 的伪空判断（overload ==），Haxe 侧改为
+        // PORT-NOTE: C# 的 `unity.UnityObject.exists(prefab)` 是 Unity 的伪空判断（overload ==），Haxe 侧改为
         // unity.UnityObject.exists（null 安全）。
         if (unity.UnityObject.exists(prefab)) {
             model = cast unity.UnityObject.Instantiate(prefab, null, null, parent);

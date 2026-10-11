@@ -18,6 +18,7 @@ import pvzengine.entities.Entity;
 import pvzengine.entities.EntityCollisionHelper;
 import tools.FrameTimer;
 import unity.Mathf;
+import unity.UnityObject;
 using mvz2.vanilla.contraptions.VanillaContraptionProps;
 using mvz2.vanilla.enemies.VanillaEnemyProps;
 using mvz2.vanilla.entities.VanillaColliderExt;
@@ -75,7 +76,7 @@ class Mesmerizer extends AIEntityBehaviour
         {
             var orbID = GetOrb(entity);
             var orb = orbID != null ? orbID.GetEntity(entity.Level) : null;
-            if (orb == null || !orb.Exists() || orb.IsDead)
+            if (orb == null || !unity.UnityObject.exists(orb) || orb.IsDead)
             {
                 EndCasting(entity);
             }

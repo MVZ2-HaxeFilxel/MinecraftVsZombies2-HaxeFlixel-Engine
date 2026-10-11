@@ -73,6 +73,7 @@ class AreaModel extends Model
 }
 
 // [Serializable]
+@:rtti
 class SerializableAreaModelData extends SerializableModelData
 {
 	public var currentPreset:Null<String>;

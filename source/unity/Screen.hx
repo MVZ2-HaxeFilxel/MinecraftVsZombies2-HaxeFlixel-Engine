@@ -27,6 +27,10 @@ class Screen {
     public static var fullScreen(get, set):Bool;
     static function get_fullScreen():Bool return FlxG.fullscreen;
     static function set_fullScreen(value:Bool):Bool {
+        // MVZ2-DEBUG-WINDOWED: 验证用环境变量强制窗口化（全屏时 lime 窗口位置异常，底部 UI 落到
+        // 屏幕外无法交互）。收尾时移除。
+        if (Sys.getEnv("MVZ2_WINDOWED") == "1")
+            value = false;
         FlxG.fullscreen = value;
         return value;
     }

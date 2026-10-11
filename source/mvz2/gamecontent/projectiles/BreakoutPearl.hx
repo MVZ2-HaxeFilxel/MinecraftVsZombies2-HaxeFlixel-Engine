@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Projectiles/Chapter2/BreakoutPearl.cs
 package mvz2.gamecontent.projectiles;
 
+import unity.UnityObject;
 import mvz2.vanilla.audios.VanillaSoundID;
 import mvz2.vanilla.callbacks.VanillaCallbackPriorities;
 import mvz2.vanilla.callbacks.VanillaLevelCallbacks;
@@ -33,7 +34,7 @@ class BreakoutPearl extends EntityBehaviourDefinition
         var projectile = hit.Projectile;
         if (!projectile.Definition.HasBehaviour(this))
             return;
-        if (projectile.Parent != null && projectile.Parent.Exists())
+        if (projectile.Parent != null && unity.UnityObject.exists(projectile.Parent))
         {
             result.SetFinalValue(false);
             return;

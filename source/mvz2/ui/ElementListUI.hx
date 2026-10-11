@@ -8,7 +8,7 @@ import unity.ui.LayoutElement;
 import unity.ui.Shadow;
 import unity.MonoBehaviour;
 import unity.ui.LayoutElement.LayoutGroup;
-import unity.ui.Shadow.LayoutRebuilder;
+import unity.ui.LayoutRebuilder;
 
 class ElementListUI extends unity.MonoBehaviour
 {

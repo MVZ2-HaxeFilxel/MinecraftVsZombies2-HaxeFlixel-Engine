@@ -69,6 +69,7 @@ class ModelGroupUI extends ModelGroup
 	// #endregion
 }
 
+@:rtti
 class SerializableModelGroupUI extends SerializableModelGroup
 {
 	public function new()

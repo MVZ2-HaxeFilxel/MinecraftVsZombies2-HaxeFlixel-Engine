@@ -3,6 +3,7 @@ package mvz2.models;
 
 import tools.ObjectExtensions;
 import unity.GameObject;
+import unity.UnityObject;
 
 // [ExecuteAlways]
 class AnimationGameObjectToggler extends unity.MonoBehaviour {
@@ -14,9 +15,9 @@ class AnimationGameObjectToggler extends unity.MonoBehaviour {
         UpdateEnable();
     }
     public function UpdateEnable():Void {
-        if (gameObjectA.Exists())
+        if (unity.UnityObject.exists(gameObjectA))
             gameObjectA.SetActive(enableB < 0.99);
-        if (gameObjectB.Exists())
+        if (unity.UnityObject.exists(gameObjectB))
             gameObjectB.SetActive(enableB >= 0.99);
     }
     private var enableB:Float;

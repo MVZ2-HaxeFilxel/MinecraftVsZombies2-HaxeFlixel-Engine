@@ -45,6 +45,7 @@ class BlueprintComponent extends MVZ2Component implements IBlueprintComponent
 	public static var ID:NamespaceID = new NamespaceID("mvz2", "blueprints");
 }
 
+@:rtti
 class SerializableBlueprintComponent implements ISerializableLevelComponent
 {
 	public var isConveyorMode:Bool;

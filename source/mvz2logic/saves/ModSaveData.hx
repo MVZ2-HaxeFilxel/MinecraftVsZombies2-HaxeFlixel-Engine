@@ -207,6 +207,7 @@ class ModSaveData
 }
 
 // abstract
+@:rtti
 class SerializableModSaveData
 {
 	public function new() {}

@@ -23,6 +23,7 @@ import pvzengine.modifiers.BooleanModifier;
 import pvzengine.modifiers.FloatModifier;
 import pvzengine.modifiers.NumberOperator;
 import unity.Mathf;
+import unity.UnityObject;
 import mvz2.vanilla.callbacks.VanillaLevelCallbacks.WaterInteractionParams;
 using mvz2.vanilla.entities.VanillaEntityProps;
 
@@ -113,7 +114,7 @@ class AboveCloudBuff extends BuffDefinition
         {
             VanillaEntityExt.RemoveDie(entity);
         }
-        if (entity.Exists())
+        if (unity.UnityObject.exists(entity))
         {
             entity.Remove();
         }

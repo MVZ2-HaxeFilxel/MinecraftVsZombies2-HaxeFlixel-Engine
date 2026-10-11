@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Bosses/TheGiantSnakeTail.cs
 package mvz2.gamecontent.bosses;
 
+import unity.UnityObject;
 import mvz2.gamecontent.damages.VanillaDamageEffects;
 import mvz2.vanilla.entities.VanillaEntityExt;
 import mvz2.vanilla.entities.VanillaEntityProps;
@@ -42,7 +43,7 @@ class TheGiantSnakeTail extends BossBehaviour
     {
         super.UpdateLogic(entity);
         var parent = entity.Parent;
-        if (parent == null || !parent.Exists())
+        if (parent == null || !unity.UnityObject.exists(parent))
         {
             entity.Remove();
             return;
@@ -55,7 +56,7 @@ class TheGiantSnakeTail extends BossBehaviour
         var self = collision.Entity;
         if (self.IsDead)
             return;
-        if (!other.Exists())
+        if (!unity.UnityObject.exists(other))
             return;
         if (other.IsEntityOf(VanillaBossID.theGiant) && TheGiant.IsSnake(other) && (other.GetCenter() - self.GetCenter()).magnitude < KILL_SNAKE_DISTANCE)
         {
@@ -74,7 +75,7 @@ class TheGiantSnakeTail extends BossBehaviour
         super.PreTakeDamage(damageInfo, result);
         var self = damageInfo.Entity;
         var parent = self.Parent;
-        if (parent != null && parent.Exists())
+        if (parent != null && unity.UnityObject.exists(parent))
         {
             // C#: oldEffects.Union(transferDamageExtraEffects).ToArray()
             var oldEffects = damageInfo.Effects.GetEffects();

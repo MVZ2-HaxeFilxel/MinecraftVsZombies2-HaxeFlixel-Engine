@@ -5,6 +5,7 @@ package tools;
  * C# 的 `Timer` 为抽象类。Haxe 的 `abstract` 关键字语义不同，故仍写 `class`，
  * 抽象成员以 `throw "abstract"` 占位（PORTING.md §抽象类/方法）。
  */
+@:rtti
 class Timer
 {
 	public function new() {}

@@ -27,6 +27,9 @@ class InputNameDialogController extends MonoBehaviour {
         renamingUserIndex = renameIndex;
         return task;
     }
+    /** 移植层新增：同步 Task shim 直通后由主流程主动收起对话框（见 MainmenuController.Init
+     *  的 PORT-NOTE —— 直通意味着确认回调无人等待，对话框会永远挂在屏幕上挡住模态遮罩）。*/
+    public function Dismiss():Void Hide();
     private function Hide():Void {
         gameObject.SetActive(false);
         inputNameType = InputNameType.None;

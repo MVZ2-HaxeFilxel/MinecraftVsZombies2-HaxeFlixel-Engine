@@ -19,6 +19,7 @@ import pvzengine.entities.Entity;
 import pvzengine.modifiers.ColorModifier;
 import unity.Color;
 import unity.Mathf;
+import unity.UnityObject;
 using mvz2.gamecontent.difficulties.VanillaDifficultyLevelProps;
 using mvz2.vanilla.entities.VanillaEntityExt;
 using mvz2.vanilla.entities.VanillaEntityProps;
@@ -48,7 +49,7 @@ class GunpowderTwinkle extends EntityBehaviourDefinition
         var offset = new Color(1, 0, 0, r);
         SetColorOffset(pickup, offset);
 
-        if (!collected && timeout <= 1 && pickup.Exists())
+        if (!collected && timeout <= 1 && unity.UnityObject.exists(pickup))
         {
             var damage = pickup.GetDamage() * pickup.Level.GetGunpowderDamageMultiplier();
             var range = pickup.GetRange();

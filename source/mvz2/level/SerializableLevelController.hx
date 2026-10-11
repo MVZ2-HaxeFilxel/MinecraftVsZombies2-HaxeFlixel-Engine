@@ -20,6 +20,7 @@ import mvz2.ui.level.LevelUIPreset;
 
 // PORT-NOTE: C# 的 [BsonIgnoreExtraElements] 特性在 Haxe 中无对应语义，保留为元数据。
 @:bsonIgnoreExtraElements
+@:rtti
 class SerializableLevelController
 {
 	public var rng:SerializableRNG;

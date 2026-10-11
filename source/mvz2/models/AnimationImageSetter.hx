@@ -6,6 +6,7 @@ import tools.ObjectExtensions;
 import unity.Mathf;
 import unity.Sprite;
 import unity.ui.Image;
+import unity.UnityObject;
 
 // [RequireComponent(typeof(Image))]
 // [ExecuteAlways]
@@ -44,7 +45,7 @@ class AnimationImageSetter extends unity.MonoBehaviour {
     }
     private var Renderer(get, never):Image;
     function get_Renderer():Image {
-        if (!image.Exists()) {
+        if (!unity.UnityObject.exists(image)) {
             image = GetComponent(Image);
         }
         return image;

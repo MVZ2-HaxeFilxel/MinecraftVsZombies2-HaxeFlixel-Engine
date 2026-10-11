@@ -238,22 +238,17 @@ class SerializeHelper
 		return new system.io.MemoryStream(File.getBytes(path));
 	}
 	// PORT-NOTE: C# 扩展方法 ToBson 使用 MongoDB.Bson 的 ToJson；Haxe 用 haxe.Json 等价实现。
+	// MVZ2-DEBUG-BSON: 降级计数（收尾时移除）。
 	public static function ToBson(obj:Dynamic, readFriendly:Bool = false):String
 	{
+		// PORT-NOTE: haxe.Json 的 JsonPrinter 不认 cpp.Int64（Type.getClass 返回 null，
+		// classString 里 getInstanceFields(null) 直接段错误）。存档结构
+		// （SerializableModSaveData 的 stats / playTimeMilliseconds，C# 的 long）大量使用
+		// Int64，序列化前统一深拷贝转成 Float（JSON 数字；毫秒/计数值远小于 2^53，无损）。
 		// TODO-PORT: CustomClassMapConvention（只映射字段、忽略默认值）无法在 Haxe 中复现，
 		// 序列化结果与 BSON 不同，字段/默认值处理规则见 CustomClassMapConvention。
-		return haxe.Json.stringify(obj, readFriendly ? "  " : null);
-	}
-	// TODO-PORT: C# 泛型 T FromBson<T>(string bson)，Haxe 无显式类型实参，改为可选传入类型对象
-	// （省略时靠调用点的返回类型推断，见 mvz2logic.modding.Mod.Deserialize）。
-	public static function FromBson<T>(bson:String, ?type:Class<T>):T
-	{
-		return haxe.Json.parse(bson);
-	}
-	// TODO-PORT: C# 参数为 IBsonReader，Haxe 无对应类型，改为读取整段字符串。
-	public static function ReadBson<T>(text:String, ?type:Class<T>):T
-	{
-		return haxe.Json.parse(text);
+		var converted = convertForJson(obj, 0);
+		return haxe.Json.stringify(converted, readFriendly ? "  " : null);
 	}
 	public static function RegisterSerializer<T>(serializer:T):Void
 	{

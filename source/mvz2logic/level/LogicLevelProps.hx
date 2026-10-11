@@ -21,7 +21,7 @@ class LogicLevelProps
 	}
 
 	//region 屏幕覆盖
-	public static var SCREEN_COVER:PropertyMeta<Color> = Get("screenCover");
+	public static var SCREEN_COVER:PropertyMeta<Color> = Get("screenCover", new Color(0, 0, 0, 0));
 	public static function GetScreenCover(level:LevelEngine):Color
 	{
 		return level.GetProperty(SCREEN_COVER);
@@ -33,7 +33,7 @@ class LogicLevelProps
 	//endregion
 
 	//region 禁止暂停
-	public static var PAUSE_DISABLED:PropertyMeta<Bool> = Get("pause_disabled");
+	public static var PAUSE_DISABLED:PropertyMeta<Bool> = Get("pause_disabled", false);
 	public static function IsPauseDisabled(level:LevelEngine):Bool
 	{
 		return level.GetProperty(PAUSE_DISABLED);
@@ -45,7 +45,7 @@ class LogicLevelProps
 	//endregion
 
 	//region 镜头旋转
-	public static var CAMERA_ROTATION:PropertyMeta<Float> = Get("cameraRotation");
+	public static var CAMERA_ROTATION:PropertyMeta<Float> = Get("cameraRotation", 0.0);
 	public static function GetCameraRotation(level:LevelEngine):Float
 	{
 		return level.GetProperty(CAMERA_ROTATION);
@@ -57,7 +57,7 @@ class LogicLevelProps
 	//endregion
 
 	//region 低质音乐
-	public static var MUSIC_LOW_QUALITY:PropertyMeta<Bool> = Get("musicLowQuality");
+	public static var MUSIC_LOW_QUALITY:PropertyMeta<Bool> = Get("musicLowQuality", false);
 	public static function IsMusicLowQuality(level:LevelEngine):Bool
 	{
 		return level.GetProperty(MUSIC_LOW_QUALITY);
@@ -65,7 +65,7 @@ class LogicLevelProps
 	//endregion
 
 	//region 画面降级
-	public static var GRAPHICS_DOWNGRADE:PropertyMeta<Bool> = Get("graphicsDowngrade");
+	public static var GRAPHICS_DOWNGRADE:PropertyMeta<Bool> = Get("graphicsDowngrade", false);
 	public static function AreGraphicsDowngrade(level:LevelEngine):Bool
 	{
 		return level.GetProperty(GRAPHICS_DOWNGRADE);
@@ -103,10 +103,10 @@ class LogicLevelProps
 	//endregion
 
 	//region 星之碎片
-	public static var STARSHARD_COUNT:PropertyMeta<Int> = Get("starshardCount");
-	public static var STARSHARD_SLOT_COUNT:PropertyMeta<Int> = Get("starshardSlotCount");
+	public static var STARSHARD_COUNT:PropertyMeta<Int> = Get("starshardCount", 0);
+	public static var STARSHARD_SLOT_COUNT:PropertyMeta<Int> = Get("starshardSlotCount", 0);
 	public static var STARSHARD_DISABLE_ID:PropertyMeta<NamespaceID> = Get("starshardDisableID");
-	public static var STARSHARD_DISABLE_ICON:PropertyMeta<Bool> = Get("starshardDisableIcon");
+	public static var STARSHARD_DISABLE_ICON:PropertyMeta<Bool> = Get("starshardDisableIcon", false);
 	public static function GetStarshardSlotCount(game:LevelEngine):Int
 	{
 		return game.GetProperty(STARSHARD_SLOT_COUNT);
@@ -154,9 +154,9 @@ class LogicLevelProps
 
 	//region 铁镐
 	public static var PICKAXE_DISABLE_ID:PropertyMeta<NamespaceID> = Get("pickaxeDisableID");
-	public static var PICKAXE_DISABLE_ICON:PropertyMeta<Bool> = Get("pickaxeDisableIcon");
-	public static var PICKAXE_REMAIN_COUNT:PropertyMeta<Int> = Get("pickaxeRemainCount");
-	public static var PICKAXE_COUNT_LIMIT:PropertyMeta<Int> = Get("pickaxeCountLimit");
+	public static var PICKAXE_DISABLE_ICON:PropertyMeta<Bool> = Get("pickaxeDisableIcon", false);
+	public static var PICKAXE_REMAIN_COUNT:PropertyMeta<Int> = Get("pickaxeRemainCount", 0);
+	public static var PICKAXE_COUNT_LIMIT:PropertyMeta<Int> = Get("pickaxeCountLimit", 0);
 	public static function IsPickaxeDisabled(level:LevelEngine):Bool
 	{
 		return NamespaceID.IsValid(GetPickaxeDisableID(level));
@@ -231,7 +231,7 @@ class LogicLevelProps
 	//endregion
 
 	//region 最后敌人位置
-	public static var LAST_ENEMY_POSITION:PropertyMeta<Vector3> = Get("lastEnemyPosition");
+	public static var LAST_ENEMY_POSITION:PropertyMeta<Vector3> = Get("lastEnemyPosition", new Vector3(0, 0, 0));
 	public static function GetLastEnemyPosition(game:LevelEngine):Vector3
 	{
 		return game.GetProperty(LAST_ENEMY_POSITION);
@@ -243,7 +243,7 @@ class LogicLevelProps
 	//endregion
 
 	//region 让手持物品保持在屏幕内
-	public static var KEEP_HELD_ITEM_IN_SCREEN:PropertyMeta<Bool> = Get("keepHeldItemInScreen");
+	public static var KEEP_HELD_ITEM_IN_SCREEN:PropertyMeta<Bool> = Get("keepHeldItemInScreen", false);
 	public static function KeepHeldItemInScreen(level:LevelEngine):Bool
 	{
 		return level.GetProperty(KEEP_HELD_ITEM_IN_SCREEN);
@@ -259,9 +259,9 @@ class LogicLevelProps
 	//endregion
 
 	//region 出怪点数
-	public static var SPAWN_POINTS_POWER:PropertyMeta<Float> = Get("spawnPointsPower");
-	public static var SPAWN_POINTS_MUTLIPLIER:PropertyMeta<Float> = Get("spawnPointsMultiplier");
-	public static var SPAWN_POINTS_ADDITION:PropertyMeta<Float> = Get("spawnPointsAddition");
+	public static var SPAWN_POINTS_POWER:PropertyMeta<Float> = Get("spawnPointsPower", 0.0);
+	public static var SPAWN_POINTS_MUTLIPLIER:PropertyMeta<Float> = Get("spawnPointsMultiplier", 0.0);
+	public static var SPAWN_POINTS_ADDITION:PropertyMeta<Float> = Get("spawnPointsAddition", 0.0);
 	public static var BOSS_SPAWN_POINTS_MULTIPLIER:PropertyMeta<Float> = Get("boss_spawn_points_multiplier", 1.0);
 	public static function GetSpawnPointPower(level:LevelEngine):Float
 	{
@@ -298,7 +298,7 @@ class LogicLevelProps
 	//endregion
 
 	//region 昼夜循环覆盖
-	public static var DAY_NIGHT_CYCLE_OVERRIDE:PropertyMeta<Int> = Get("day_night_cycle_override");
+	public static var DAY_NIGHT_CYCLE_OVERRIDE:PropertyMeta<Int> = Get("day_night_cycle_override", 0);
 	public static function GetDayNightCycleOverride(game:LevelEngine):Int
 	{
 		return game.GetProperty(DAY_NIGHT_CYCLE_OVERRIDE);
@@ -306,7 +306,7 @@ class LogicLevelProps
 	//endregion
 
 	//region 假定存在敌人
-	public static var ASSUME_HAS_ENEMIES:PropertyMeta<Bool> = Get("assume_has_enemies");
+	public static var ASSUME_HAS_ENEMIES:PropertyMeta<Bool> = Get("assume_has_enemies", false);
 	public static function AssumeHasEnemies(game:LevelEngine):Bool
 	{
 		return game.GetProperty(ASSUME_HAS_ENEMIES);
@@ -314,7 +314,7 @@ class LogicLevelProps
 	//endregion
 
 	//region 所有怪物被清理
-	public static var ALL_ENEMIES_CLEARED:PropertyMeta<Bool> = Get("allEnemiesCleared");
+	public static var ALL_ENEMIES_CLEARED:PropertyMeta<Bool> = Get("allEnemiesCleared", false);
 	public static function IsAllEnemiesCleared(level:LevelEngine):Bool
 	{
 		return level.GetProperty(ALL_ENEMIES_CLEARED);
@@ -326,7 +326,7 @@ class LogicLevelProps
 	//endregion
 
 	//region 忽略一大波事件
-	public static var IGNORE_HUGE_WAVE_EVENT:PropertyMeta<Bool> = Get("ignoreHugeWaveEvent");
+	public static var IGNORE_HUGE_WAVE_EVENT:PropertyMeta<Bool> = Get("ignoreHugeWaveEvent", false);
 	public static function IgnoreHugeWaveEvent(level:LevelEngine):Bool
 	{
 		return level.GetProperty(IGNORE_HUGE_WAVE_EVENT);
@@ -338,7 +338,7 @@ class LogicLevelProps
 	//endregion
 
 	//region 无推车
-	public static var NO_CARTS:PropertyMeta<Bool> = Get("noCarts");
+	public static var NO_CARTS:PropertyMeta<Bool> = Get("noCarts", false);
 	public static function HasNoCarts(level:LevelEngine):Bool
 	{
 		return level.GetProperty(NO_CARTS);
@@ -350,7 +350,7 @@ class LogicLevelProps
 	//endregion
 
 	//region 上帝模式
-	public static var GODMODE:PropertyMeta<Bool> = Get("godmode");
+	public static var GODMODE:PropertyMeta<Bool> = Get("godmode", false);
 	public static function IsGodMode(level:LevelEngine):Bool
 	{
 		return level.GetProperty(GODMODE);

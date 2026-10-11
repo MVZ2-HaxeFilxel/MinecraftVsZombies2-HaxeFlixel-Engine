@@ -40,6 +40,7 @@ class EndlessRecord
 }
 
 // [Serializable]
+@:rtti
 class SerializableEndlessRecord
 {
 	public function new() {}

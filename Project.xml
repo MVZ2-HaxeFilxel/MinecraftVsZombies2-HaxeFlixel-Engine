@@ -77,6 +77,9 @@
 	<!--Whether the game has a debug console-->
 	<define name="MVZ2_DEBUG_CONSOLE" unless="release" />
 
+	<!--排查期临时：链接期生成完整 PDB，便于 cdb 符号化崩溃栈。修复完成后移除。-->
+	<haxedef name="HXCPP_DEBUG_LINK" if="windows" />
+
 	<!-- ________________________________ Custom ________________________________ -->
 
 	<!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->

@@ -33,7 +33,7 @@ class VanillaMod extends Mod implements IVanillaInterface
     }
     override public function LoadSaveData(json:String):ModSaveData
     {
-        var serializable:SerializableLogicSaveData = Deserialize(json);
+        var serializable:SerializableLogicSaveData = Deserialize(json, SerializableLogicSaveData);
         return LogicSaveData.DeserializeFrom(serializable);
     }
     override public function PostAllSaveDataLoaded():Void

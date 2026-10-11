@@ -40,6 +40,7 @@ import mvz2logic.options.OptionWidgetType;
 import pvzengine.NamespaceID;
 import tools.ObjectExtensions;
 import unity.Mathf;
+import unity.UnityObject;
 using mvz2logic.options.LogicOptionExt;  // EXTUSING
 using mvz2logic.games.LogicGameExt;  // EXTUSING
 using mvz2logic.commands.LogicOptionWidgetProps;  // EXTUSING
@@ -112,7 +113,7 @@ class OptionsDialogController extends unity.MonoBehaviour {
             return;
         var dropdown:OptionDropdownDefinition = cast definition;
         var widgets = ui.MoreOptions.GetWidgetsByID(id);
-        if (!widgets.Exists())
+        if (!unity.UnityObject.exists(widgets))
             return;
         var items:Array<String> = [];
         dropdown.FillItems(context, items);
@@ -182,7 +183,7 @@ class OptionsDialogController extends unity.MonoBehaviour {
                     UpdateDifficultyButton(Main.OptionsManager.GetDifficulty());
                     SaveOptions();
                     var level = Main.LevelManager.GetLevelController();
-                    if (level.Exists()) {
+                    if (unity.UnityObject.exists(level)) {
                         level.UpdateDifficulty();
                     }
                 }
@@ -192,7 +193,7 @@ class OptionsDialogController extends unity.MonoBehaviour {
             case ButtonType.LeaveLevel:
                 {
                     var level = Main.LevelManager.GetLevelController();
-                    if (!level.Exists()) {
+                    if (!unity.UnityObject.exists(level)) {
                         return;
                     }
                     // PORT-NOTE: C# 的 ShowDialogSelect 返回 bool（同步等待选择）；
@@ -219,7 +220,7 @@ class OptionsDialogController extends unity.MonoBehaviour {
             case ButtonType.Restart:
                 {
                     var level = Main.LevelManager.GetLevelController();
-                    if (!level.Exists())
+                    if (!unity.UnityObject.exists(level))
                         return;
                     level.ShowRestartConfirmDialog();
                 }
@@ -303,7 +304,7 @@ class OptionsDialogController extends unity.MonoBehaviour {
             text = Main.LanguageManager._p(handler.context, handler.text);
         }
         var camera = ui.GetCamera();
-        if (!camera.Exists())
+        if (!unity.UnityObject.exists(camera))
             return;
         var content = new TooltipContent();
         content.description = text;
@@ -340,7 +341,7 @@ class OptionsDialogController extends unity.MonoBehaviour {
             ui.Main.SetButtonActive(ButtonType.LeaveLevel, false);
         } else if (Std.isOfType(context, IOptionContextLevel)) {
             var level = Main.LevelManager.GetLevelController();
-            var isInLevel = level.Exists() && (level.IsGameStarted() || level.GetCurrentFlag() > 0);
+            var isInLevel = unity.UnityObject.exists(level) && (level.IsGameStarted() || level.GetCurrentFlag() > 0);
             ui.Main.SetButtonActive(ButtonType.Difficulty, !isInLevel);
             ui.Main.SetButtonActive(ButtonType.Restart, isInLevel);
             ui.Main.SetButtonActive(ButtonType.LeaveLevel, true);

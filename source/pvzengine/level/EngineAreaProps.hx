@@ -9,18 +9,18 @@ import pvzengine.PropertyRegions;
 @:propertyRegistryRegion(PropertyRegions.level)
 class EngineAreaProps
 {
-	private static function Get<T>(name:String):PropertyMeta<T>
+	private static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
 	{
-		return new PropertyMeta<T>(name);
+		return new PropertyMeta<T>(name, defaultValue);
 	}
-	public static var GRID_WIDTH:PropertyMeta<Float> = Get("GridWidth");
-	public static var GRID_HEIGHT:PropertyMeta<Float> = Get("GridHeight");
-	public static var GRID_LEFT_X:PropertyMeta<Float> = Get("GridLeftX");
-	public static var GRID_BOTTOM_Z:PropertyMeta<Float> = Get("GridBottomZ");
-	public static var ENEMY_SPAWN_X:PropertyMeta<Float> = Get("enemySpawnX");
-	public static var ENTITY_LANE_Z_OFFSET:PropertyMeta<Float> = Get("EntityLawnZOffset");
-	public static var MAX_LANE_COUNT:PropertyMeta<Int> = Get("MaxLaneCount");
-	public static var MAX_COLUMN_COUNT:PropertyMeta<Int> = Get("MaxColumnCount");
+	public static var GRID_WIDTH:PropertyMeta<Float> = Get("GridWidth", 0.0);
+	public static var GRID_HEIGHT:PropertyMeta<Float> = Get("GridHeight", 0.0);
+	public static var GRID_LEFT_X:PropertyMeta<Float> = Get("GridLeftX", 0.0);
+	public static var GRID_BOTTOM_Z:PropertyMeta<Float> = Get("GridBottomZ", 0.0);
+	public static var ENEMY_SPAWN_X:PropertyMeta<Float> = Get("enemySpawnX", 0.0);
+	public static var ENTITY_LANE_Z_OFFSET:PropertyMeta<Float> = Get("EntityLawnZOffset", 0.0);
+	public static var MAX_LANE_COUNT:PropertyMeta<Int> = Get("MaxLaneCount", 0);
+	public static var MAX_COLUMN_COUNT:PropertyMeta<Int> = Get("MaxColumnCount", 0);
 	public static var CART_REFERENCE:PropertyMeta<NamespaceID> = Get("cartReference");
 	public static var AREA_TAGS:PropertyMeta<Array<NamespaceID>> = Get("areaTags");
 

@@ -1567,6 +1567,7 @@ class LevelBlueprintChooseController extends LevelControllerPart
 	}
 }
 
+@:rtti
 class SerializableLevelBlueprintChooseController extends SerializableLevelControllerPart
 {
 	public function new()

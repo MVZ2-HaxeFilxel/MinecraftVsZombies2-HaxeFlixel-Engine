@@ -94,6 +94,7 @@ class UserStatCategory
 }
 
 // [Serializable]
+@:rtti
 class SerializableUserStatCategory
 {
 	public function new() {}

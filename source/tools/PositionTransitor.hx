@@ -5,6 +5,7 @@ import unity.Application;
 import unity.MonoBehaviour;
 import unity.Transform;
 import unity.Vector3;
+import unity.UnityObject;
 
 @:executeInEditMode
 @:DisallowMultipleComponent
@@ -94,10 +95,10 @@ class PositionTransitor extends MonoBehaviour
 	{
 		if (isLocalMode)
 		{
-			var targetPosition = targetTransform.Exists() ? targetTransform.position : _targetPosition;
+			var targetPosition = unity.UnityObject.exists(targetTransform) ? targetTransform.position : _targetPosition;
 			var globalStartPosition:Vector3;
 			var localStartPosition:Vector3;
-			if (startTransform.Exists())
+			if (unity.UnityObject.exists(startTransform))
 			{
 				globalStartPosition = startTransform.position;
 				localStartPosition = globalToLocalPoint(startTransform.position);
@@ -114,8 +115,8 @@ class PositionTransitor extends MonoBehaviour
 		}
 		else
 		{
-			var startPosition = startTransform.Exists() ? startTransform.position : _startPosition;
-			var targetPosition = targetTransform.Exists() ? targetTransform.position : _targetPosition;
+			var startPosition = unity.UnityObject.exists(startTransform) ? startTransform.position : _startPosition;
+			var targetPosition = unity.UnityObject.exists(targetTransform) ? targetTransform.position : _targetPosition;
 
 			var position = Transit(startPosition, targetPosition, time);
 			setWorldPosition(position);

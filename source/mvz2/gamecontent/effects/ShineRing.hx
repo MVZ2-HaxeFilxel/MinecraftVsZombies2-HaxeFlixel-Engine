@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Effects/Chapter1/ShineRing.cs
 package mvz2.gamecontent.effects;
 
+import unity.UnityObject;
 import mvz2logic.entities.LogicEntityExt;
 import pvzengine.entities.Entity;
 import mvz2.gamecontent.effects.VanillaEffectID.VanillaEffectNames;
@@ -18,7 +19,7 @@ class ShineRing extends EffectBehaviour
     {
         super.Update(entity);
         var parent = entity.Parent;
-        if (parent == null || !parent.Exists() || parent.IsDead)
+        if (parent == null || !unity.UnityObject.exists(parent) || parent.IsDead)
         {
             entity.Remove();
             return;

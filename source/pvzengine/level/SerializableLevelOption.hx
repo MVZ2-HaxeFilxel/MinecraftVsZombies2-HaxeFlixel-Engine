@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Engine/Level/Level/SerializableLevelOption.cs
 package pvzengine.level;
 
+@:rtti
 class SerializableLevelOption
 {
 	public var leftFaction:Int;

@@ -93,7 +93,8 @@ class LanguagePackMetadata {
     public var description:String;
     public var dataVersion:Int;
     // [JsonIgnore]
-    public var icon:Sprite = null;
+    // PORT-NOTE: json2object 的对应语义是 @:jignored；icon 是运行期资源（unity.Sprite），不参与反序列化。
+    @:jignored public var icon:Sprite = null;
 }
 
 class LanguageAssets {

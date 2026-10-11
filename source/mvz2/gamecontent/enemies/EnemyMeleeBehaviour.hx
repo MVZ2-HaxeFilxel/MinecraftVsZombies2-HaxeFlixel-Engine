@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Enemies/Melee/EnemyMeleeBehaviour.cs
 package mvz2.gamecontent.enemies;
 
+import unity.UnityObject;
 import mvz2.gamecontent.damages.VanillaDamageEffects;
 import mvz2.gamecontent.entities.AIEntityBehaviour;
 import mvz2.vanilla.callbacks.VanillaLevelCallbacks;
@@ -94,7 +95,7 @@ class EnemyMeleeBehaviour extends AIEntityBehaviour
     //region 检验目标
     function ValidateMeleeTarget(enemy:Entity, target:Null<Entity>):Bool
     {
-        if (target == null || !target.Exists() || target.IsDead)
+        if (target == null || !unity.UnityObject.exists(target) || target.IsDead)
             return false;
         if (!enemy.IsHostile(target))
             return false;
@@ -107,7 +108,7 @@ class EnemyMeleeBehaviour extends AIEntityBehaviour
             if (target.IsFloor())
                 return false;
             var protector = target.GetProtector();
-            if (protector != null && protector.Exists() && !protector.IsFriendly(enemy))
+            if (protector != null && unity.UnityObject.exists(protector) && !protector.IsFriendly(enemy))
                 return false;
         }
         return true;

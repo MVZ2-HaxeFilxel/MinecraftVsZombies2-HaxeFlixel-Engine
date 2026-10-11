@@ -60,6 +60,7 @@ class LevelDifficultyRecord
 }
 
 // [Serializable]
+@:rtti
 class SerializableLevelDifficultyRecord
 {
 	public function new() {}

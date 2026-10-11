@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Engine/Level/Entities/EntityID.cs
 package pvzengine.entities;
 
+import unity.UnityObject;
 import pvzengine.level.LevelEngine;
 
 // PORT-NOTE: C# 的 `long` -> `haxe.Int64`；C# 的三个构造重载（无参 / long / Entity）在 Haxe 中
@@ -53,7 +54,7 @@ class EntityID
 	public function Exists(game:LevelEngine):Bool
 	{
 		var entity = GetEntity(game);
-		return entity != null && entity.Exists();
+		return entity != null && unity.UnityObject.exists(entity);
 	}
 	public function Equals(other:Dynamic):Bool
 	{

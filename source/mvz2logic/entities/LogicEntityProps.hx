@@ -84,7 +84,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 掉落物目标点
-	public static var PICKUP_DESTINATION:PropertyMeta<Int> = Get("pickup_destination");
+	public static var PICKUP_DESTINATION:PropertyMeta<Int> = Get("pickup_destination", 0);
 	// TODO-PORT: C# 重载 GetPickupDestination(this EntityDefinition)，Haxe 不支持重载，重命名为 GetPickupDestinationOfDefinition
 	public static function GetPickupDestinationOfDefinition(definition:EntityDefinition):Int
 	{
@@ -97,7 +97,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 变种
-	public static var VARIANT:PropertyMeta<Int> = Get("variant");
+	public static var VARIANT:PropertyMeta<Int> = Get("variant", 0);
 	public static function GetVariant(entity:Entity):Int
 	{
 		return entity.GetProperty(VARIANT);
@@ -109,7 +109,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 能量消耗
-	public static var COST:PropertyMeta<Int> = Get("cost");
+	public static var COST:PropertyMeta<Int> = Get("cost", 0);
 	public static function GetCost(entity:Entity):Int
 	{
 		return entity.GetProperty(COST);
@@ -135,9 +135,9 @@ class LogicEntityProps
 	//endregion
 
 	//region 更新
-	public static var UPDATE_BEFORE_GAME:PropertyMeta<Bool> = Get("updateBeforeGame");
-	public static var UPDATE_IN_PAUSE:PropertyMeta<Bool> = Get("updateInPause");
-	public static var UPDATE_AFTER_GAME_OVER:PropertyMeta<Bool> = Get("updateAfterGameOver");
+	public static var UPDATE_BEFORE_GAME:PropertyMeta<Bool> = Get("updateBeforeGame", false);
+	public static var UPDATE_IN_PAUSE:PropertyMeta<Bool> = Get("updateInPause", false);
+	public static var UPDATE_AFTER_GAME_OVER:PropertyMeta<Bool> = Get("updateAfterGameOver", false);
 	public static function SetCanUpdateBeforeGameStart(entity:Entity, value:Bool):Void
 	{
 		entity.SetProperty(UPDATE_BEFORE_GAME, value);
@@ -186,7 +186,7 @@ class LogicEntityProps
 	//endregion
 
 	//region HSV
-	public static var HSV_OFFSET:PropertyMeta<Vector3> = Get("hsv_offset");
+	public static var HSV_OFFSET:PropertyMeta<Vector3> = Get("hsv_offset", new Vector3(0, 0, 0));
 	public static function SetHSVOffset(entity:Entity, h:Float, s:Float, v:Float):Void
 	{
 		SetHSVOffsetByVector(entity, new Vector3(h, s, v));
@@ -223,7 +223,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 灰度
-	public static var GRAYSCALE:PropertyMeta<Bool> = Get("grayscale");
+	public static var GRAYSCALE:PropertyMeta<Bool> = Get("grayscale", false);
 	public static function SetGrayscale(entity:Entity, value:Bool):Void
 	{
 		entity.SetProperty(GRAYSCALE, value);
@@ -235,7 +235,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 深度检测
-	public static var DEPTH_TEST:PropertyMeta<Bool> = Get("depth_test");
+	public static var DEPTH_TEST:PropertyMeta<Bool> = Get("depth_test", false);
 	public static function SetDepthTtest(entity:Entity, value:Bool):Void
 	{
 		entity.SetProperty(DEPTH_TEST, value);
@@ -247,7 +247,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 起始位置偏移
-	public static var STARTING_POSITION_OFFSET:PropertyMeta<Vector3> = Get("starting_position_offset");
+	public static var STARTING_POSITION_OFFSET:PropertyMeta<Vector3> = Get("starting_position_offset", new Vector3(0, 0, 0));
 	public static function GetStartingPositionOffset(entityDef:EntityDefinition):Vector3
 	{
 		return entityDef.GetProperty(STARTING_POSITION_OFFSET);
@@ -255,10 +255,10 @@ class LogicEntityProps
 	//endregion
 
 	//region 光照
-	public static var IS_LIGHT_SOURCE:PropertyMeta<Bool> = Get("isLightSource");
-	public static var LIT_MASK:PropertyMeta<Int> = Get("lit_mask");
-	public static var LIGHT_COLOR:PropertyMeta<Color> = Get("lightColor");
-	public static var LIGHT_RANGE:PropertyMeta<Vector3> = Get("lightRange");
+	public static var IS_LIGHT_SOURCE:PropertyMeta<Bool> = Get("isLightSource", false);
+	public static var LIT_MASK:PropertyMeta<Int> = Get("lit_mask", 0);
+	public static var LIGHT_COLOR:PropertyMeta<Color> = Get("lightColor", new Color(0, 0, 0, 0));
+	public static var LIGHT_RANGE:PropertyMeta<Vector3> = Get("lightRange", new Vector3(0, 0, 0));
 	public static function SetLightSource(entity:Entity, value:Bool):Void
 	{
 		entity.SetProperty(IS_LIGHT_SOURCE, value);
@@ -305,10 +305,10 @@ class LogicEntityProps
 	//endregion
 
 	//region 影子
-	public static var SHADOW_HIDDEN:PropertyMeta<Bool> = Get("shadowHidden");
-	public static var SHADOW_ALPHA:PropertyMeta<Float> = Get("shadowAlpha");
-	public static var SHADOW_SCALE:PropertyMeta<Vector3> = Get("shadowScale");
-	public static var SHADOW_OFFSET:PropertyMeta<Vector3> = Get("shadowOffset");
+	public static var SHADOW_HIDDEN:PropertyMeta<Bool> = Get("shadowHidden", false);
+	public static var SHADOW_ALPHA:PropertyMeta<Float> = Get("shadowAlpha", 0.0);
+	public static var SHADOW_SCALE:PropertyMeta<Vector3> = Get("shadowScale", new Vector3(0, 0, 0));
+	public static var SHADOW_OFFSET:PropertyMeta<Vector3> = Get("shadowOffset", new Vector3(0, 0, 0));
 	public static function IsShadowHidden(entity:Entity):Bool
 	{
 		return entity.GetProperty(SHADOW_HIDDEN);
@@ -345,7 +345,7 @@ class LogicEntityProps
 
 	//region 排序
 	public static var SORTING_LAYER:PropertyMeta<String> = Get("sortingLayer");
-	public static var SORTING_ORDER:PropertyMeta<Int> = Get("sortingOrder");
+	public static var SORTING_ORDER:PropertyMeta<Int> = Get("sortingOrder", 0);
 	public static function GetSortingLayer(entity:Entity):Null<String>
 	{
 		return entity.GetProperty(SORTING_LAYER);
@@ -365,7 +365,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 血条
-	public static var HP_BAR_VISIBILITY:PropertyMeta<Int> = Get("hp_bar_visibility");
+	public static var HP_BAR_VISIBILITY:PropertyMeta<Int> = Get("hp_bar_visibility", 0);
 	public static function GetHPBarVisibility(entity:Entity):Int
 	{
 		return entity.GetProperty(HP_BAR_VISIBILITY);
@@ -377,7 +377,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 血条
-	public static var SHOW_HEIGHT_INDICATOR:PropertyMeta<Bool> = Get("show_height_indicator");
+	public static var SHOW_HEIGHT_INDICATOR:PropertyMeta<Bool> = Get("show_height_indicator", false);
 	public static function ShowHeightIndicator(entity:Entity):Bool
 	{
 		return entity.GetProperty(SHOW_HEIGHT_INDICATOR);
@@ -389,7 +389,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 死亡后移除
-	public static var REMOVE_ON_DEATH:PropertyMeta<Bool> = Get("remove_on_death");
+	public static var REMOVE_ON_DEATH:PropertyMeta<Bool> = Get("remove_on_death", false);
 	public static function IsRemoveOnDeath(entity:Entity):Bool
 	{
 		return entity.GetProperty(REMOVE_ON_DEATH);
@@ -401,7 +401,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 死亡效果
-	public static var NO_DEATH_EFFECTS:PropertyMeta<Bool> = Get("no_death_effects");
+	public static var NO_DEATH_EFFECTS:PropertyMeta<Bool> = Get("no_death_effects", false);
 	public static function HasNoDeathEffects(entity:Entity):Bool
 	{
 		return entity.GetProperty(NO_DEATH_EFFECTS);
@@ -413,7 +413,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 死亡效果
-	public static var NO_NEUTRALIZE_ON_DEATH:PropertyMeta<Bool> = Get("no_neutralize_on_death");
+	public static var NO_NEUTRALIZE_ON_DEATH:PropertyMeta<Bool> = Get("no_neutralize_on_death", false);
 	public static function NoNeutralizedOnDeath(entity:Entity):Bool
 	{
 		return entity.GetProperty(NO_NEUTRALIZE_ON_DEATH);
@@ -437,7 +437,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 铁镐目标
-	public static var KILL_BY_PICKAXE:PropertyMeta<Bool> = Get("kill_by_pickaxe");
+	public static var KILL_BY_PICKAXE:PropertyMeta<Bool> = Get("kill_by_pickaxe", false);
 	public static function CanBeKilledByPickaxe(contraption:Entity):Bool
 	{
 		return contraption.GetProperty(KILL_BY_PICKAXE);
@@ -500,7 +500,7 @@ class LogicEntityProps
 	//endregion
 
 	//region 统计
-	public static var HIDE_IN_STATS:PropertyMeta<Bool> = Get("hide_in_stats");
+	public static var HIDE_IN_STATS:PropertyMeta<Bool> = Get("hide_in_stats", false);
 	public static function HideInStats(entityDef:EntityDefinition):Bool
 	{
 		return entityDef.GetProperty(HIDE_IN_STATS);

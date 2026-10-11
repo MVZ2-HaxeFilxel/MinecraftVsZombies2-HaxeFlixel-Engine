@@ -49,6 +49,7 @@ import pvzengine.shells.ShellDefinition;
 import tools.GenericHelper;
 import unity.Color;
 import unity.Mathf;
+import unity.UnityObject;
 using pvzengine.ContentProviderHelper;
 
 // PORT-NOTE: 既有上层调用点把 EngineArmorProps / EngineArmorExt / BuffTargetExt 的扩展方法当作 Armor 的实例方法
@@ -193,7 +194,7 @@ class Armor implements IModifiablePropertyTarget implements IAuraSource implemen
 	}
 	public function Exists():Bool
 	{
-		return Owner != null && Owner.Exists() && Owner.IsEquippingArmor(this);
+		return Owner != null && unity.UnityObject.exists(Owner) && Owner.IsEquippingArmor(this);
 	}
 	public function OnAddToLevel(level:LevelEngine):Void
 	{

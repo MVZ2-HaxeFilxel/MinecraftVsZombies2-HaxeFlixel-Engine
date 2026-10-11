@@ -17,16 +17,16 @@ class LogicDifficultyProps
 	public static var NAME:PropertyMeta<String> = Get("name");
 	// PORT-NOTE: C# 扩展方法 -> 静态方法
 	public static function GetName(def:DifficultyDefinition):Null<String> return def.GetProperty(NAME);
-	public static var VALUE:PropertyMeta<Int> = Get("value");
+	public static var VALUE:PropertyMeta<Int> = Get("value", 0);
 	public static function GetValue(def:DifficultyDefinition):Int return def.GetProperty(VALUE);
-	public static var CLEAR_MONEY:PropertyMeta<Int> = Get("clear_money");
+	public static var CLEAR_MONEY:PropertyMeta<Int> = Get("clear_money", 0);
 	public static function GetClearMoney(def:DifficultyDefinition):Int return def.GetProperty(CLEAR_MONEY);
-	public static var CART_CONVERT_MONEY:PropertyMeta<Int> = Get("cart_convert_money");
+	public static var CART_CONVERT_MONEY:PropertyMeta<Int> = Get("cart_convert_money", 0);
 	public static function GetCartConvertMoney(def:DifficultyDefinition):Int return def.GetProperty(CART_CONVERT_MONEY);
-	public static var RERUN_CLEAR_MONEY:PropertyMeta<Int> = Get("rerun_clear_money");
+	public static var RERUN_CLEAR_MONEY:PropertyMeta<Int> = Get("rerun_clear_money", 0);
 	public static function GetRerunClearMoney(def:DifficultyDefinition):Int return def.GetProperty(RERUN_CLEAR_MONEY);
 
-	public static var PUZZLE_MONEY:PropertyMeta<Int> = Get("puzzle_money");
+	public static var PUZZLE_MONEY:PropertyMeta<Int> = Get("puzzle_money", 0);
 	public static function GetPuzzleMoney(def:DifficultyDefinition):Int return def.GetProperty(PUZZLE_MONEY);
 
 	public static var BUFF_ID:PropertyMeta<NamespaceID> = Get("buff_id");

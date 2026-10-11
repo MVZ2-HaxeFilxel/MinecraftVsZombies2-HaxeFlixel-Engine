@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/GlobalCallbacks/GemStageGlobalCallbacks.cs
 package mvz2.gamecontent.globalcallbacks;
 
+import unity.UnityObject;
 import mvz2.gamecontent.buffs.enemies.GemCarrierBuff;
 import mvz2.gamecontent.stages.GemStageBehaviour;
 import mvz2.vanilla.enemies.VanillaEnemyProps;
@@ -34,7 +35,7 @@ class GemStageGlobalCallbacks extends VanillaGlobalCallbacks
         if (firstGem == null)
             return;
         var gem = firstGem.GetEntity(level);
-        if (gem == null || !gem.Exists() || VanillaPickupExt.IsCollected(gem))
+        if (gem == null || !unity.UnityObject.exists(gem) || VanillaPickupExt.IsCollected(gem))
         {
             var adviceContext = CONTEXT_ADVICE_COLLECT_MONEY;
             var adviceText = ADVICE_COLLECT_MONEY_1;

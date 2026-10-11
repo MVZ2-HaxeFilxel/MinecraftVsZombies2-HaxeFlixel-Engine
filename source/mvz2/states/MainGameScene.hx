@@ -386,6 +386,19 @@ class MainGameScene {
 			// （CustomDialog / InputNameDialog / DeleteUserDialog 各自的 prefab 实例）。
 			// 因此三个 build*Dialog() 共用一个 Dialogs 父节点，不要各建一个。
 			var dialogsObject = childRect(uiObject, "Dialogs");
+			// PORT-NOTE: prefab 里 "Dialogs" 节点（`assets/scene_prefabs/Prefabs/MainGame.json`
+			// 节点 21）的 RectTransform 序列化值：anchorMin=(0,0)、anchorMax=(1,1)、
+			// sizeDelta=(0,0)、pivot=(0.5,0.5) —— 铺满整个画布。`childRect()` 给的是
+			// RectTransform 默认值（anchorMin/Max=(0.5,0.5)、sizeDelta=(0,0)），不补这些字段
+			// 的话，三个对话框的根（各自 prefab 数据的根都是 amin=(0,0)/amax=(1,1) 的拉伸 rect，
+			// 由 ScenePrefabLoader 的根接管模式写入）会被这个 0×0 父帧塌成 1×1：Blocker
+			//（raycastTarget=1 的模态遮罩）挡不住点击，布局也跟着错。与上面 ScreenCover 同一处补法。
+			var dialogsRect:RectTransform = cast dialogsObject.transform;
+			dialogsRect.anchorMin = new Vector2(0, 0);
+			dialogsRect.anchorMax = new Vector2(1, 1);
+			dialogsRect.anchoredPosition = new Vector2(0, 0);
+			dialogsRect.sizeDelta = new Vector2(0, 0);
+			dialogsRect.pivot = new Vector2(0.5, 0.5);
 			// PORT-NOTE: CustomDialog 是 MainSceneUI 的 [SerializeField] 引用，由 MainGame.prefab
 			// （fileID 4113767335989909255 的 MainSceneUI 组件）注入 CustomDialog.prefab 的实例。
 			// 缺了它，GameEntrance.CheckSaveDataStatus → MainSceneController.ShowDialogMessageAsync
@@ -414,6 +427,10 @@ class MainGameScene {
 			//（MainSceneController.hx:317，在有 tooltip 源且有相机时触发）会空引用。
 			var uiCameraObject = child(mainScene, "Camera");
 			var uiCamera = attach(uiCameraObject, new Camera());
+			// PORT-NOTE: 与 Assets/Prefabs/Camera.prefab 一致（orthographicSize=3）。
+			// 缺了这一项会取 Camera 默认值 5 → 正交投影 ppu 从 120 变 72，世界空间 UI
+			// （主菜单按钮、Stats/Achievements 页）整体缩成 0.6 倍且与背景错位。
+			uiCamera.orthographicSize = 3;
 			uiCameraObject.tag = "MainCamera";
 			sceneController.uiCamera = uiCamera;
 			var uiCameraLimiter = attach(child(mainScene, "UICameraLimiter"), new CameraLimiter());
@@ -988,15 +1005,10 @@ class MainGameScene {
 				var fn:Dynamic = Reflect.field(comp, "Awake");
 				if (fn == null || !Reflect.isFunction(fn))
 					continue;
-				// OptionsDialogMainPage 的字段来自独立 OptionsDialog prefab。当前对象图只注入了
-				// MainScene 页面，未能保证这些 TextSlider/LabeledToggle 引用全部存在；其 Awake
-				// 会在第一处缺失引用上直接触发 hxcpp 访问违例。先跳过这个可选页面组件，避免
-				// 启动阶段崩溃；OptionsDialogController 仍可安全初始化，后续由完整 prefab 注入补齐。
-				var className = Type.getClassName(Type.getClass(comp));
-				if (className == "mvz2.ui.OptionsDialogMainPage") {
-					BootTrace.step('跳过存在未注入引用风险的 Awake：$className@${go.name}');
-					continue;
-				}
+				// PORT-NOTE: 这里原先按类名跳过 `mvz2.ui.OptionsDialogMainPage`——当时它的 Awake
+				// 会直接解引用未注入的 musicSlider / fastForwardSlider / pauseOnFocusLostToggle，
+				// 在 hxcpp 上触发访问违例。该 Awake 现已改成逐项判空后再登记字典（缺失引用只是
+				// 不参与事件分发），不再需要跳过，恢复正常派发。
 				// PORT-NOTE: 闭包必须捕获 `comp` 的**当前值**，故先绑定到局部变量再登记。
 				var target = comp;
 				var label = '${Type.getClassName(Type.getClass(target))}@${go.name}';

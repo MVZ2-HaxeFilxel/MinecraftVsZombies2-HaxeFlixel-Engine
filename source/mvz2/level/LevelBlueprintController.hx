@@ -312,6 +312,7 @@ class LevelBlueprintController extends LevelControllerPart
 	private var conveyorBlueprints:Array<ConveyorBlueprintController> = [];
 }
 
+@:rtti
 class SerializableLevelBlueprintController extends SerializableLevelControllerPart
 {
 	public var classicBlueprints:Array<SerializableBlueprintController>;

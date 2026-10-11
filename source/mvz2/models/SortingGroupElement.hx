@@ -22,6 +22,7 @@ class SortingGroupElement extends GraphicElement
 	private var _group:Null<SortingGroup>;
 }
 
+@:rtti
 class SerializableSortinGroupElement extends SerializableGraphicElement
 {
 	public function new()

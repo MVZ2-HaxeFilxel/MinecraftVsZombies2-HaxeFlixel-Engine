@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Enemies/Chapter6/WispFly_SelfDestruct.cs
 package mvz2.gamecontent.enemies;
 
+import unity.UnityObject;
 import mvz2.gamecontent.damages.VanillaDamageEffects;
 import mvz2.gamecontent.entities.AIEntityBehaviour;
 import mvz2.vanilla.contraptions.VanillaContraptionExt;
@@ -62,7 +63,7 @@ class WispFly_SelfDestruct extends AIEntityBehaviour
             if (target.IsFloor())
                 return false;
             var protector = target.GetProtector();
-            if (protector != null && protector.Exists() && !protector.IsFriendly(enemy))
+            if (protector != null && unity.UnityObject.exists(protector) && !protector.IsFriendly(enemy))
                 return false;
         }
         return true;

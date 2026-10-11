@@ -97,6 +97,7 @@ abstract Color(ColorData) from ColorData to ColorData {
     public function toString():String return 'RGBA(${this.r}, ${this.g}, ${this.b}, ${this.a})';
 }
 
+@:rtti
 class ColorData {
     public var r:Float;
     public var g:Float;

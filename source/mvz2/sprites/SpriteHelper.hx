@@ -31,6 +31,10 @@ class SpriteHelper {
         var pixels = texture.GetPixels32();
         var w = texture.width;
         var h = texture.height;
+        // PORT-NOTE(防段错误): 解码失败时 pixels 为空/null 或长度不足 w*h，
+        // 直接按下标读会拿到 null 元素再取 .a 就是空指针解引用；Unity 语义上此时无事可做。
+        if (pixels == null || pixels.length < w * h || w <= 0 || h <= 0)
+            return;
 
         for (y in 0...h) {
             for (x in 0...w) {
@@ -76,6 +80,8 @@ class SpriteHelper {
         var colors = texture.GetPixels32();
         var width = texture.width;
         var height = texture.height;
+        if (colors == null || colors.length < width * height || width <= 0 || height <= 0)
+            return;
 
         var tempRow:Array<Color32> = [];
         tempRow.resize(width);

@@ -105,14 +105,14 @@ class LevelManager extends MonoBehaviour implements IGlobalLevel
 			// 读取文件内容
 			// PORT-NOTE: C# 使用 StreamReader + MongoDB.Bson.IO.JsonReader 逐行反序列化；
 			// 移植层 FileManager.ReadStringFile 已负责解压与整文件读取，这里按行切分后交给
-			// SerializeHelper.ReadBson(text, type)。
+			// SerializeMacro.ReadBson(text, type)。
 			var text = Main.FileManager.ReadStringFile(path);
 			if (text == null)
 				return;
 			var lines = text.split("\n");
 
 			// 读取首行数据
-			var header = mvz2logic.serialization.SerializeHelper.ReadBson(lines[0], SerializableLevelControllerHeader);
+			var header = mvz2logic.serialization.SerializeMacro.ReadBson(lines[0], SerializableLevelControllerHeader);
 
 			// 验证首行数据
 			var validate = controller.ValidateGameStateHeader(header);
@@ -120,7 +120,7 @@ class LevelManager extends MonoBehaviour implements IGlobalLevel
 				return;
 
 			// 读取内容
-			var content = mvz2logic.serialization.SerializeHelper.ReadBson(lines[1], SerializableLevelController);
+			var content = mvz2logic.serialization.SerializeMacro.ReadBson(lines[1], SerializableLevelController);
 
 			var success = controller.LoadGame(content, Main.Game, areaID, stageID);
 			if (!success)
@@ -359,6 +359,7 @@ class LevelDataIdentifierCompareResult
 	public function new() {}
 }
 
+@:rtti
 class LevelDataIdentifierPair
 {
 	public var lhs:LevelDataIdentifier;
@@ -366,6 +367,7 @@ class LevelDataIdentifierPair
 	public function new() {}
 }
 
+@:rtti
 class LevelDataIdentifierList
 {
 	public function new(identifiers:Array<LevelDataIdentifier>)
@@ -445,6 +447,7 @@ class LevelDataIdentifierList
 	public var identifiers:Array<LevelDataIdentifier> = [];
 }
 
+@:rtti
 class LevelDataIdentifier
 {
 	public function new(name:String, version:Int)

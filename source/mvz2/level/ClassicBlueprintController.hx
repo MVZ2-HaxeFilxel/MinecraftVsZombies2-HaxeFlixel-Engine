@@ -66,6 +66,7 @@ class ClassicBlueprintController extends RuntimeBlueprintController
 	public var CurrentRecharged(default, null):Bool;
 }
 
+@:rtti
 class SerializableClassicBlueprintController extends SerializableBlueprintController
 {
 	public var recharged:Bool;

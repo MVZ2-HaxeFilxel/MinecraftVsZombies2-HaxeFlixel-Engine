@@ -287,6 +287,7 @@ private class ColliderCache {
     public var colliderID:Int64;
 }
 
+@:rtti
 class SerializableUnityEntityCollider implements ISerializableCollisionCollider {
     public var name:String;
     public var enabled:Bool;

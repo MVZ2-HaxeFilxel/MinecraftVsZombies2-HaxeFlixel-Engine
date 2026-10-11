@@ -9,9 +9,9 @@ import pvzengine.PropertyMeta;
 @:propertyRegistryRegion(LogicPropertyRegions.note)
 class LogicNoteProps
 {
-	private static function Get<T>(name:String):PropertyMeta<T>
+	private static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
 	{
-		return new PropertyMeta<T>(name);
+		return new PropertyMeta<T>(name, defaultValue);
 	}
 	// #region 笔记贴图
 	public static var NOTE_SPRITE:PropertyMeta<SpriteReference> = Get("note_sprite");
@@ -39,7 +39,7 @@ class LogicNoteProps
 	// #endregion
 
 	// #region 可翻转
-	public static var CAN_FLIP:PropertyMeta<Bool> = Get("can_flip");
+	public static var CAN_FLIP:PropertyMeta<Bool> = Get("can_flip", false);
 	public static function CanFlip(definition:NoteDefinition):Bool
 	{
 		return definition.GetProperty(CAN_FLIP);

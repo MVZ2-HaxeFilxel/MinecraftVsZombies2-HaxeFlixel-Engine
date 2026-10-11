@@ -108,6 +108,7 @@ abstract Vector3(Vector3Data) from Vector3Data to Vector3Data {
     @:from public static inline function fromVector2(v:Vector2):Vector3 return new Vector3(v.x, v.y, 0);
 }
 
+@:rtti
 class Vector3Data {
     public var x:Float;
     public var y:Float;

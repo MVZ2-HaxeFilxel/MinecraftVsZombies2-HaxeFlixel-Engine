@@ -26,6 +26,7 @@ __pycache__/
 /verify/tmpimport3/
 /verify/tmpimport4/
 /verify/tmpsave/
+/verify/varray_out/
 
 # ===== 工具生成的中间文件 =====
 /tools_build/_apply.json

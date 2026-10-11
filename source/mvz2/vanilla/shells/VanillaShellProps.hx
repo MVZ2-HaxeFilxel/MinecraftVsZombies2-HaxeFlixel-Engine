@@ -9,14 +9,14 @@ import pvzengine.shells.ShellDefinition;
 @:propertyRegistryRegion(PropertyRegions.shell)
 class VanillaShellProps
 {
-    static function Get<T>(name:String):PropertyMeta<T>
+    static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
     {
-        return new PropertyMeta<T>(name);
+        return new PropertyMeta<T>(name, defaultValue);
     }
-    public static var SLICE_CRITICAL:PropertyMeta<Bool> = Get("sliceCritical");
-    public static var BLOCKS_FIRE:PropertyMeta<Bool> = Get("blocksFire");
+    public static var SLICE_CRITICAL:PropertyMeta<Bool> = Get("sliceCritical", false);
+    public static var BLOCKS_FIRE:PropertyMeta<Bool> = Get("blocksFire", false);
     public static var HIT_SOUND:PropertyMeta<NamespaceID> = Get("hitSound");
-    public static var BLOCKS_SLICE:PropertyMeta<Bool> = Get("blocks_slice");
+    public static var BLOCKS_SLICE:PropertyMeta<Bool> = Get("blocks_slice", false);
 
     public static function IsSliceCritical(shell:ShellDefinition):Bool
     {

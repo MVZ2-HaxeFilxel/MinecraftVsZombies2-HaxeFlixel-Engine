@@ -25,6 +25,7 @@ import pvzengine.level.StageDefinition;
 import tools.FrameTimer;
 import unity.Mathf;
 import unity.Vector3;
+import unity.UnityObject;
 
 class FrankensteinStageBehaviour extends BossStageBehaviour
 {
@@ -53,7 +54,7 @@ class FrankensteinStageBehaviour extends BossStageBehaviour
 
         // 如果没有科学怪人的目标，再生成一个。
         var targetEnemy = level.FindFirstEntity(function(e) return !e.IsDead && e.HasBuff(FrankensteinTransformerBuff));
-        if (targetEnemy == null || !targetEnemy.Exists())
+        if (targetEnemy == null || !unity.UnityObject.exists(targetEnemy))
         {
             var position = new Vector3(LevelPositions.ENEMY_RIGHT_BORDER, 0, level.GetEntityLaneZ(Mathf.FloorToInt(level.GetMaxLaneCount() * 0.5)));
             targetEnemy = level.Spawn(VanillaEnemyID.zombie, position, null);

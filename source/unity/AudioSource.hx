@@ -169,8 +169,13 @@ class AudioSource extends Behaviour {
     // #region 播放控制
     public function Play():Void {
         var flx = prepareSound();
-        if (flx == null)
+        if (flx == null) {
+            // PORT-NOTE: Unity 的 Play() 在 clip 为空/音频数据取不到时静默失败（移植层保留该行为），
+            // 但补一次告警：否则整条播放链失败时日志里没有任何痕迹。具体原因见 prepareSound 的告警
+            // （clip 为空 / 解码失败），同一条只记一次。
+            WarnOnce('Play/${clipKey(_clip)}', 'AudioSource.Play 被跳过：${clipKey(_clip)} 无法播放（原因见上一条告警）。');
             return;
+        }
         applyVolume();
         applyPitch();
         clockPosition = 0;
@@ -183,12 +188,16 @@ class AudioSource extends Behaviour {
         Play();
     }
     public function PlayOneShot(clip:AudioClip, ?volumeScale:Float = 1):Void {
-        if (clip == null)
+        if (clip == null) {
+            WarnOnce("PlayOneShot/null-clip", 'AudioSource.PlayOneShot 被跳过：clip 为 null。');
             return;
+        }
         var group = getBusGroup();
         var oneShot = clip.newSound(false);
-        if (oneShot == null)
+        if (oneShot == null) {
+            WarnOnce('PlayOneShot/${clipKey(clip)}', 'AudioSource.PlayOneShot 被跳过：${clipKey(clip)} 无法播放（音频数据缺失）。');
             return;
+        }
         oneShot.volume = clamp01(_volume * (volumeScale == null ? 1 : volumeScale));
         // PORT-NOTE: 一次性音效没有 AudioSource 持有它，同样要补上「后端不上报位置」时的结束检测，
         // 否则它会一直留在 FlxG.sound.list 里且 playing 永为 true。
@@ -271,8 +280,10 @@ class AudioSource extends Behaviour {
 
     /** 保证有一个装载了当前 clip 的 FlxSound（必要时解码），并挂到总线上。 */
     private function prepareSound():PlaybackSound {
-        if (_clip == null)
+        if (_clip == null) {
+            WarnOnce('prepareSound/null-clip', 'AudioSource：clip 为 null 时调用了 Play。');
             return null;
+        }
         if (sound != null && loadedClip == _clip && sound.exists) {
             sound.looped = _loop;
             attachSound();
@@ -281,7 +292,10 @@ class AudioSource extends Behaviour {
         stopAndRelease();
         sound = _clip.newSound(_loop, _loop ? null : onSoundComplete);
         if (sound == null) {
-            // PORT-NOTE: 音频数据缺失时 Unity 的 Play() 会静默失败（clip 为空），保持一致。
+            // PORT-NOTE: 音频数据缺失时 Unity 的 Play() 会静默失败（clip 为空），保持一致；
+            // 但补一次告警（带 clip 的资源路径），否则解码失败时没有任何日志痕迹。
+            WarnOnce('prepareSound/decode/${clipKey(_clip)}',
+                'AudioSource：${clipKey(_clip)} 解码不出可播放的声音数据，播放已放弃。');
             return null;
         }
         sound.onTick = onTick;
@@ -328,6 +342,24 @@ class AudioSource extends Behaviour {
         return 1;
         #end
     }
+
+    /** clip 的诊断名：优先 lime 资源路径（audio_manifest.json 的 assetPath），其次资源名。 */
+    private static function clipKey(clip:AudioClip):String {
+        if (clip == null)
+            return "<null clip>";
+        if (clip.soundKey != null)
+            return clip.soundKey;
+        return clip.name != null && clip.name.length > 0 ? clip.name : "<unnamed clip>";
+    }
+
+    /** 同一条播放失败原因只告警一次（播放失败通常会被反复重试，避免刷屏）。 */
+    private static function WarnOnce(key:String, message:String):Void {
+        if (warnedKeys.exists(key))
+            return;
+        warnedKeys.set(key, true);
+        Debug.LogWarning(message);
+    }
+    private static var warnedKeys:Map<String, Bool> = new Map();
 
     /**
      * 非循环音效播完后的清理：把它从 flixel 的更新列表里摘掉。

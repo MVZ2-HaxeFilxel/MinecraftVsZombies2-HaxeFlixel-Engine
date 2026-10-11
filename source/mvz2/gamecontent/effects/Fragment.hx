@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Effects/Prologue/Fragment.cs
 package mvz2.gamecontent.effects;
 
+import unity.UnityObject;
 import mvz2.vanilla.contraptions.VanillaContraptionProps;
 import mvz2.vanilla.properties.VanillaEntityPropertyMeta;
 import pvzengine.NamespaceID;
@@ -19,7 +20,7 @@ class Fragment extends EffectBehaviour
     {
         super.Update(entity);
         var parent = entity.Parent;
-        if (parent != null && parent.Exists())
+        if (parent != null && unity.UnityObject.exists(parent))
         {
             entity.Timeout = 30;
             entity.Position = parent.Position;

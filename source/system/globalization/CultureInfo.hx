@@ -21,6 +21,14 @@ class CultureInfo {
         return new CultureInfo(name);
     }
 
+    // PORT-NOTE: 语言对话框按 `NativeName(语言代码)` 显示条目（LanguageManager.GetLanguageName），
+    // 直接返回 Name 会显示成 "zh-Hans(zh-Hans)"。lime 的 Locale 给不出本地化显示名，
+    // 因此只补工程实际使用的两种语言（LanguageManager.CN / EN），其余仍回落 Name。
+    static var NATIVE_NAMES:Map<String, String> = [
+        "zh-Hans" => "中文（简体）",
+        "en-US" => "English (United States)"
+    ];
+
     public var Name(default, null):String;
     public var NativeName(get, never):String;
     public var TwoLetterISOLanguageName(get, never):String;
@@ -34,6 +42,9 @@ class CultureInfo {
     }
 
     function get_NativeName():String {
+        // PORT-NOTE: Map<String,String> 在 hxcpp 上是 StringMap，null 键查表会直接崩，故先判 null。
+        if (Name != null && NATIVE_NAMES.exists(Name))
+            return NATIVE_NAMES.get(Name);
         return Name;
     }
 

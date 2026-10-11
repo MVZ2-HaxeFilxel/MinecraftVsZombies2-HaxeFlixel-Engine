@@ -32,8 +32,33 @@ class Texture2D extends UnityObject {
     }
     public function ReadPixels(source:Rect, destX:Int, destY:Int):Void {}
     public function LoadImage(bytes:haxe.io.Bytes):Void {
-        // PORT-NOTE: 贴图解码在资源整合阶段由 lime.graphics 实现，此处仅保留数据引用。
         rawBytes = bytes;
+        // PORT-NOTE: 原实现只存 rawBytes 不解码，导致 width/height 停在构造值（2x2）、
+        // pixels32 为空数组——SpriteHelper.FixTransparency 随即在 pixels[idx] 处读到 null
+        // 元素而段错误（启动期崩溃点之一）。Unity 的 LoadImage 是同步解码，这里同样立即
+        // 解码出尺寸与像素；解码结果同时挂到 graphic 供 SpriteFrameFactory 复用。
+        try {
+            var bitmap = openfl.display.BitmapData.fromBytes(bytes);
+            if (bitmap != null) {
+                width = bitmap.width;
+                height = bitmap.height;
+                var colors:Array<Color32> = [];
+                for (y in 0...height) {
+                    for (x in 0...width) {
+                        var p = bitmap.getPixel32(x, y); // ARGB
+                        colors.push(new Color32((p >> 16) & 0xFF, (p >> 8) & 0xFF, p & 0xFF, (p >>> 24) & 0xFF));
+                    }
+                }
+                pixels32 = colors;
+                try {
+                    graphic = FlxGraphic.fromBitmapData(bitmap, false, null, true);
+                    if (graphic != null)
+                        graphic.destroyOnNoUse = false;
+                } catch (e:Dynamic) {}
+            }
+        } catch (e:Dynamic) {
+            Debug.LogWarning('Texture2D.LoadImage 解码失败（$e）');
+        }
     }
 
     // PORT-NOTE: added for MVZ2.Sprites.SpriteHelper (pixel access + PNG encoding).

@@ -14,6 +14,7 @@ import pvzengine.modifiers.ColorModifier;
 import pvzengine.modifiers.IntModifier;
 import pvzengine.modifiers.IntegerOperator;
 import unity.Color;
+import unity.UnityObject;
 
 @:autoBuffDefinition(VanillaBuffNames.Entity_charm)
 class CharmBuff extends BuffDefinition
@@ -37,7 +38,7 @@ class CharmBuff extends BuffDefinition
         {
             var sourceID = buff.GetProperty(PROP_SOURCE);
             var source = sourceID == null ? null : sourceID.GetEntity(buff.Level);
-            if (source == null || !source.Exists() || source.IsDead)
+            if (source == null || !unity.UnityObject.exists(source) || source.IsDead)
             {
                 LogicEntityExt.PlaySound(entity, VanillaSoundID.mindClear);
                 buff.Remove();

@@ -104,6 +104,12 @@ class EntityController extends unity.MonoBehaviour implements ILevelRaycastRecei
         entity.OnEquipArmor.add(OnArmorEquipCallback);
         entity.OnRemoveArmor.add(OnArmorRemoveCallback);
 
+        // PORT-NOTE: hpBarSource 原在 Awake 创建，但移植层的 UnityObject.Instantiate 不派发
+        // Awake（CreateControllerForEntity → Instantiate 模板后直接 Init），Unity 里 Instantiate
+        // 是会调 Awake 的。这里按需补建：null 时 AddHPBarSource 会把 null 当 Map 键，
+        // 之后 UpdateHPBars 遍历 buffer 调 IsActive() 直接空引用。
+        if (hpBarSource == null)
+            hpBarSource = new EntityHPBarSource(this);
         Level.AddHPBarSource(hpBarSource);
         holdStreakHandler.ResetData();
         RemoveCursorSource();
@@ -691,7 +697,7 @@ class EntityController extends unity.MonoBehaviour implements ILevelRaycastRecei
         return GetHPBarText(entity.Health, entity.GetMaxHealth(), amountMode);
     }
     public function GetArmorHPBarText(armor:Armor, amountMode:Int):String {
-        // PORT-NOTE: C# `armor.Exists()` 是 UnityEngine.Object 的扩展方法；Haxe 侧为 UnityObject.exists(obj)。
+        // PORT-NOTE: C# `unity.UnityObject.exists(armor)` 是 UnityEngine.Object 的扩展方法；Haxe 侧为 UnityObject.exists(obj)。
         if (!UnityObject.exists(armor)) {
             return Main.LanguageManager._(HP_BAR_TEXT_DESTROYED);
         }
@@ -1020,6 +1026,7 @@ class EntityCursorSource extends CursorSource {
 }
 
 // Ported from: Assets/Scripts/MVZ2/Entities/EntityController.cs (class SerializableEntityController)
+@:rtti
 class SerializableEntityController {
     public var id:haxe.Int64;
     public var model:SerializableModelData;

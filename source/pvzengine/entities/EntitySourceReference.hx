@@ -12,6 +12,7 @@ import pvzengine.level.LevelEngine;
 //   ((Entity) / (LevelEngine, SerializableEntitySourceReference))，Haxe 无重载，
 //   合并为一个按首参类型分派的方法：首参为 LevelEngine 走反序列化分支，
 //   为 Entity 走实体分支，否则视为 Clone() 使用的字段记录（见 Clone 的 PORT-NOTE）。
+@:rtti
 class EntitySourceReference implements ILevelSourceReference
 {
 	public function new(source:Dynamic, ?seri:Dynamic)
@@ -127,6 +128,7 @@ class EntitySourceReference implements ILevelSourceReference
 }
 
 // Ported from: Assets/Scripts/Engine/Level/Entities/EntitySourceReference.cs (class SerializableEntitySourceReference)
+@:rtti
 class SerializableEntitySourceReference implements ISerializableSourceReference
 {
 	public function new(reference:EntitySourceReference)

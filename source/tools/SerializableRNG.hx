@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Engine/Tools/RNG/SerializableRNG.cs
 package tools;
 
+@:rtti
 class SerializableRNG
 {
 	public function new(x:Int, y:Int, z:Int, w:Int)

@@ -16,6 +16,7 @@ import pvzengine.modifiers.NumberOperator;
 import pvzengine.modifiers.Vector3Modifier;
 import unity.Mathf;
 import unity.Vector3;
+import unity.UnityObject;
 import mvz2.gamecontent.effects.VanillaEffectID.VanillaEffectNames;
 using mvz2.vanilla.entities.VanillaColliderExt;
 using mvz2.vanilla.entities.VanillaEntityProps;
@@ -39,7 +40,7 @@ class FireBreath extends EffectBehaviour
     {
         super.Update(entity);
         var parent = entity.Parent;
-        var existing = parent != null && parent.Exists();
+        var existing = parent != null && unity.UnityObject.exists(parent);
         if (existing)
         {
             entity.Timeout = MAX_TIMEOUT;

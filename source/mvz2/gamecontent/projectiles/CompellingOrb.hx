@@ -21,6 +21,7 @@ import pvzengine.entities.EntityTypes;
 import tools.FrameTimer;
 import unity.Color;
 import unity.Vector3;
+import unity.UnityObject;
 using mvz2.vanilla.entities.VanillaEntityExt;
 using mvz2.vanilla.entities.VanillaEntityProps;
 using mvz2logic.entities.LogicEntityExt;
@@ -41,8 +42,8 @@ class CompellingOrb extends EntityBehaviourDefinition
     public override function Update(projectile:Entity):Void
     {
         super.Update(projectile);
-        if (projectile.Target == null || !projectile.Target.Exists() || projectile.Target.IsDead ||
-            projectile.Parent == null || !projectile.Parent.Exists() || projectile.Parent.IsDead)
+        if (projectile.Target == null || !unity.UnityObject.exists(projectile.Target) || projectile.Target.IsDead ||
+            projectile.Parent == null || !unity.UnityObject.exists(projectile.Parent) || projectile.Parent.IsDead)
         {
             projectile.Die();
             return;

@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/HeldItems/Behaviours/Entity/BlueprintPickupHeldItemBehaviour.cs
 package mvz2.gamecontent.helditems;
 
+import unity.UnityObject;
 import mvz2.gamecontent.pickups.BlueprintPickup;
 import mvz2.vanilla.audios.VanillaSoundID;
 import mvz2logic.Global;
@@ -225,7 +226,7 @@ class BlueprintPickupHeldItemBehaviour extends EntityHeldItemBehaviour implement
     public override function OnUpdate(level:LevelEngine, data:IHeldItemData):Void
     {
         var entity = GetEntity(level, data);
-        if (entity == null || !entity.Exists())
+        if (entity == null || !unity.UnityObject.exists(entity))
         {
             LogicLevelExt.ResetHeldItem(level);
         }

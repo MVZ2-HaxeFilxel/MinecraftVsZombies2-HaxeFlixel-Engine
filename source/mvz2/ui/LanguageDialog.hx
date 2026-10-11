@@ -10,6 +10,7 @@ class LanguageDialog extends Dialog
 {
 	public function SetLanguages(languages:Array<String>):Void
 	{
+		mvz2.states.BootTrace.step('LanguageDialog.SetLanguages: n=${languages == null ? -1 : languages.length} dropdown=${dropdown != null}');
 		dropdown.ClearOptions();
 		// PORT-NOTE: C# 为 AddOptions(languages.ToList())，TMP_Dropdown 会隐式包装 OptionData；
 		// Haxe 无隐式转换，显式构造 TMP_OptionData。

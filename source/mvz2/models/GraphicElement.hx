@@ -17,6 +17,7 @@ class GraphicElement extends unity.MonoBehaviour
 	private var excludedInGroup:Bool;
 }
 
+@:rtti
 class SerializableGraphicElement
 {
 	public function new() {}

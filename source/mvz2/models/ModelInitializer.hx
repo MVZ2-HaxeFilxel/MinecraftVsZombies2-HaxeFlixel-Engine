@@ -5,6 +5,7 @@ import mvz2.models.Model;
 import pvzengine.NamespaceID;
 import tools.ObjectExtensions;
 import unity.Camera;
+import unity.UnityObject;
 using pvzengine.PropertyKeyHelper;  // EXTUSING
 
 class ModelInitializer extends unity.MonoBehaviour {
@@ -13,7 +14,7 @@ class ModelInitializer extends unity.MonoBehaviour {
     }
 
     function Awake():Void {
-        if (model.Exists() && NamespaceID.IsValid(modelID) && modelCamera.Exists()) {
+        if (unity.UnityObject.exists(model) && NamespaceID.IsValid(modelID) && unity.UnityObject.exists(modelCamera)) {
             model.Init(modelID, modelCamera);
         }
     }

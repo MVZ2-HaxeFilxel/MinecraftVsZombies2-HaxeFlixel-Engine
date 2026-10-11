@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/HeldItems/Behaviours/Entity/ForcePadHeldItemBehaviour.cs
 package mvz2.gamecontent.helditems;
 
+import unity.UnityObject;
 import mvz2.gamecontent.contraptions.ForcePad;
 import mvz2.gamecontent.models.VanillaModelID;
 import mvz2.vanilla.audios.VanillaSoundID;
@@ -42,7 +43,7 @@ class ForcePadHeldItemBehaviour extends EntityHeldItemBehaviour
     public override function OnUpdate(level:LevelEngine, data:IHeldItemData):Void
     {
         var entity = GetEntity(level, data);
-        if (entity == null || !entity.Exists() || VanillaEntityProps.IsAIFrozen(entity))
+        if (entity == null || !unity.UnityObject.exists(entity) || VanillaEntityProps.IsAIFrozen(entity))
         {
             LogicLevelExt.ResetHeldItem(level);
             return;

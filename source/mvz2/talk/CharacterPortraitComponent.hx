@@ -26,7 +26,7 @@ class CharacterPortraitComponent extends unity.MonoBehaviour {
         });
     }
     public function DestroyGameObject():Void {
-        if (gameObject.Exists())
+        if (unity.UnityObject.exists(gameObject))
             UnityObject.Destroy(gameObject);
     }
     public var renderCamera:Camera = null;

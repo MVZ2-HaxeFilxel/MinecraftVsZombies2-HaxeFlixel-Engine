@@ -9,6 +9,7 @@ import pvzengine.level.LevelEngine;
 import pvzengine.shells.ShellDefinition;
 import tools.FrameTimer;
 import unity.Vector3;
+import unity.UnityObject;
 using pvzengine.ContentProviderHelper;
 
 // PORT-NOTE: C# 扩展方法 -> Haxe 静态工具类。既有调用点同时存在两种写法：
@@ -100,7 +101,7 @@ class EngineEntityExt
 	}
 	public static function ExistsAndAlive(entity:Null<Entity>):Bool
 	{
-		return entity != null && entity.Exists() && !entity.IsDead;
+		return entity != null && unity.UnityObject.exists(entity) && !entity.IsDead;
 	}
 	public static function IsEntitySpawnedByEntity(reference:ILevelSourceReference, level:LevelEngine,
 		predicate:ILevelSourceReference->EntityDefinition->Bool, trackableOnly:Bool = true):Bool

@@ -40,8 +40,13 @@ class Main extends Sprite
 	{
 		openfl.Lib.current.stage.addEventListener(openfl.events.Event.ENTER_FRAME, function(_) {
 			frameCount++;
-			if (frameCount == 1)
+			if (frameCount == 1) {
 				mvz2.states.BootTrace.step("ENTER_FRAME 心跳：第 1 帧（openfl 主循环在跑）");
+				var win = lime.app.Application.current != null ? lime.app.Application.current.window : null;
+				mvz2.states.BootTrace.step('窗口诊断：FlxG=${flixel.FlxG.width}x${flixel.FlxG.height}'
+					+ ' stage=${openfl.Lib.current.stage.stageWidth}x${openfl.Lib.current.stage.stageHeight}'
+					+ (win != null ? ' window=${win.width}x${win.height}@(${win.x},${win.y}) scale=${win.scale} fullscreen=${win.fullscreen}' : ' window=null'));
+			}
 			else if (frameCount % 1800 == 0)
 				mvz2.states.BootTrace.step('ENTER_FRAME 心跳：第 $frameCount 帧');
 		});

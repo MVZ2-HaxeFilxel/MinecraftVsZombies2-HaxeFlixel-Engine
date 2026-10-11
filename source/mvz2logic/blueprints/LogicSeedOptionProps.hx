@@ -9,9 +9,9 @@ import pvzengine.PropertyMeta;
 @:propertyRegistryRegion(LogicPropertyRegions.seedOption)
 class LogicSeedOptionProps
 {
-	static function Get<T>(name:String):PropertyMeta<T>
+	static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
 	{
-		return new PropertyMeta<T>(name);
+		return new PropertyMeta<T>(name, defaultValue);
 	}
 	public static var NAME:PropertyMeta<String> = Get("name");
 	public static function GetOptionName(definition:SeedOptionDefinition):Null<String>
@@ -40,7 +40,7 @@ class LogicSeedOptionProps
 		return definition.GetProperty(MODEL_ID);
 	}
 
-	public static var COST:PropertyMeta<Int> = Get("cost");
+	public static var COST:PropertyMeta<Int> = Get("cost", 0);
 	public static function GetCost(definition:SeedOptionDefinition):Int
 	{
 		return definition.GetProperty(COST);

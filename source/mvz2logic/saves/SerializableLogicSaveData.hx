@@ -6,6 +6,7 @@ import pvzengine.NamespaceID;
 import mvz2logic.saves.BlueprintSelection;
 
 // [Serializable]
+@:rtti
 class SerializableLogicSaveData extends SerializableModSaveData
 {
 	public function new() { super(); }

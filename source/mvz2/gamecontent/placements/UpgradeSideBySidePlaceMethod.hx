@@ -1,6 +1,7 @@
 // Ported from: Assets/Scripts/Vanilla/GameContent/Placements/PlaceMethods/UpgradeSideBySidePlaceMethod.cs
 package mvz2.gamecontent.placements;
 
+import unity.UnityObject;
 import mvz2.gamecontent.buffs.contraptions.ImitatedBuff;
 import mvz2.vanilla.contraptions.VanillaContraptionExt;
 import mvz2.vanilla.grids.VanillaGridStatus;
@@ -33,11 +34,11 @@ class UpgradeSideBySidePlaceMethod extends PlaceMethod implements IEntityTwinkle
     public override function GetPlaceError(placement:PlacementDefinition, grid:LawnGrid, toPlace:EntityDefinition):Null<NamespaceID>
     {
         var entity = GetTargetEntity(grid, toPlace);
-        if (entity == null || !entity.Exists())
+        if (entity == null || !unity.UnityObject.exists(entity))
             return VanillaGridStatus.onlyUpgrade;
 
         var sideEntity = GetRightEntity(grid, toPlace);
-        if (sideEntity == null || !sideEntity.Exists())
+        if (sideEntity == null || !unity.UnityObject.exists(sideEntity))
             return VanillaGridStatus.onlyUpgrade;
 
         return null;
@@ -45,11 +46,11 @@ class UpgradeSideBySidePlaceMethod extends PlaceMethod implements IEntityTwinkle
     public override function PlaceEntity(placement:PlacementDefinition, grid:LawnGrid, toPlace:EntityDefinition, param:PlaceParams):PlaceOutput
     {
         var entity = GetTargetEntity(grid, toPlace);
-        if (entity == null || !entity.Exists())
+        if (entity == null || !unity.UnityObject.exists(entity))
             return PlaceOutput.InvalidOutput;
 
         var sideEntity = GetRightEntity(grid, toPlace);
-        if (sideEntity == null || !sideEntity.Exists())
+        if (sideEntity == null || !unity.UnityObject.exists(sideEntity))
             return PlaceOutput.InvalidOutput;
 
         var isCommandBlock = LogicPlaceProps.IsCommandBlock(param);

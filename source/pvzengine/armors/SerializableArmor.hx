@@ -13,6 +13,7 @@ import pvzengine.buffs.SerializableBuffList;
 //   移植层为 pvzengine.level.PropertyBlock 模块的子类型，import 需写模块路径。
 import pvzengine.level.PropertyBlock.SerializablePropertyBlock;
 
+@:rtti
 class SerializableArmor
 {
 	// PORT-NOTE: Haxe 4.3 不再为无构造函数的类自动生成默认构造函数，C# 的隐式默认构造需显式写出。

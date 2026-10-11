@@ -10,18 +10,18 @@ import pvzengine.entities.EntityDefinition;
 @:propertyRegistryRegion(PropertyRegions.entity)
 class VanillaPickupProps
 {
-    private static function Get<T>(name:String):PropertyMeta<T>
+    private static function Get<T>(name:String, ?defaultValue:Null<T>):PropertyMeta<T>
     {
-        return new PropertyMeta<T>(name);
+        return new PropertyMeta<T>(name, defaultValue);
     }
-    public static var COLLECTED_TIME:PropertyMeta<Int> = Get("collectedTime");
-    public static var IMPORTANT:PropertyMeta<Bool> = Get("important");
-    public static var NO_AUTO_COLLECT:PropertyMeta<Bool> = Get("noAutoCollect");
+    public static var COLLECTED_TIME:PropertyMeta<Int> = Get("collectedTime", 0);
+    public static var IMPORTANT:PropertyMeta<Bool> = Get("important", false);
+    public static var NO_AUTO_COLLECT:PropertyMeta<Bool> = Get("noAutoCollect", false);
     public static var DROP_SOUND:PropertyMeta<NamespaceID> = Get("dropSound");
     public static var COLLECT_SOUND:PropertyMeta<NamespaceID> = Get("collectSound");
-    public static var ENERGY_VALUE:PropertyMeta<Int> = Get("energyValue");
-    public static var MONEY_VALUE:PropertyMeta<Int> = Get("moneyValue");
-    public static var REMOVE_ON_COLLECT:PropertyMeta<Bool> = Get("removeOnCollect");
+    public static var ENERGY_VALUE:PropertyMeta<Int> = Get("energyValue", 0);
+    public static var MONEY_VALUE:PropertyMeta<Int> = Get("moneyValue", 0);
+    public static var REMOVE_ON_COLLECT:PropertyMeta<Bool> = Get("removeOnCollect", false);
     // C#: extension method IsImportantPickup(this Entity entity)
     public static function IsImportantPickup(entity:Entity):Bool
     {
@@ -47,7 +47,7 @@ class VanillaPickupProps
     {
         return pickup.GetProperty(NO_AUTO_COLLECT);
     }
-    public static var NO_PICKUP_STOLEN:PropertyMeta<Bool> = Get("no_pickup_stolen");
+    public static var NO_PICKUP_STOLEN:PropertyMeta<Bool> = Get("no_pickup_stolen", false);
     // C#: extension method NoPickupStolen(this Entity pickup)
     public static function NoPickupStolen(pickup:Entity):Bool
     {
@@ -89,13 +89,13 @@ class VanillaPickupProps
     {
         return entity.GetProperty(REMOVE_ON_COLLECT);
     }
-    public static var NO_COLLECT:PropertyMeta<Bool> = Get("noCollect");
+    public static var NO_COLLECT:PropertyMeta<Bool> = Get("noCollect", false);
     // C#: extension method NoCollect(this Entity pickup)
     public static function NoCollect(pickup:Entity):Bool
     {
         return pickup.GetProperty(NO_COLLECT);
     }
-    public static var NO_LIMIT_IN_SCREEN:PropertyMeta<Bool> = Get("no_limit_in_screen");
+    public static var NO_LIMIT_IN_SCREEN:PropertyMeta<Bool> = Get("no_limit_in_screen", false);
     // C#: extension method NoLimitInScreen(this Entity pickup)
     public static function NoLimitInScreen(pickup:Entity):Bool
     {
@@ -112,7 +112,7 @@ class VanillaPickupProps
     {
         pickup.SetProperty(CONTENT_ID, value);
     }
-    public static var PLAY_RANDOM_PITCH_ON_COLLECT:PropertyMeta<Bool> = Get("play_random_pitch_on_collect");
+    public static var PLAY_RANDOM_PITCH_ON_COLLECT:PropertyMeta<Bool> = Get("play_random_pitch_on_collect", false);
     // C#: extension method PlayRandomPitchOnCollect(this Entity pickup)
     public static function PlayRandomPitchOnCollect(pickup:Entity):Bool
     {

@@ -24,7 +24,75 @@ class GameObject extends UnityObject {
     }
 
     public function SetActive(value:Bool):Void {
+        if (active == value)
+            return;
+        // PORT-NOTE: Unity 在 activeInHierarchy 翻转时对整棵子树的组件派发
+        // OnEnable / OnDisable（Translator 们正是靠它触发 TranslateComponent.Translate，
+        // Collider 靠它注册/注销 shim 物理世界）。移植层原来只翻标志位，于是这些组件
+        // 永远休眠（切语言 / 开对话框时文本不刷新）。这里补齐派发：
+        //  * 只翻标志（不派发）用于初始化/深拷贝路径（cloneSubtree 直接写 active）；
+        //  * 派发用「翻转前后 activeInHierarchy 比较」判定逐节点是否需要派发，
+        //    只覆盖 activeInHierarchy 真正发生变化的节点（简化：只处理自身 active 翻转
+        //    这一种触发，即 Unity 里外部整体 SetActive 子树的语义）；
+        //  * 逐个组件 try/catch 隔离，与 ModelPrefabLoader.callAwake 的容错一致；
+        //  * 派发期间的重入 SetActive 只翻标志不再递归派发，防止子树被重复遍历 /
+        //    同一组件收到两次 OnEnable。
+        var wasActiveInHierarchy = activeInHierarchy;
         active = value;
+        if (dispatchDepth > 0)
+            return;
+        dispatchDepth++;
+        try {
+            dispatchActiveMessages(value, wasActiveInHierarchy);
+        } catch (e:Dynamic) {
+            Debug.LogWarning('[GameObject] ${name}.SetActive(${value}) 派发生命周期消息时出错：$e');
+        }
+        dispatchDepth--;
+    }
+
+    /** >0 表示正在派发 OnEnable/OnDisable（此期间重入的 SetActive 只翻标志、不派发）。 */
+    private static var dispatchDepth:Int = 0;
+
+    /**
+     * 对 activeInHierarchy 发生翻转的子树节点派发 OnEnable（激活）/ OnDisable（失活）。
+     *
+     * @param activate  本次是激活（true）还是失活（false）。
+     * @param wasEnabled 本节点翻转**前**的 activeInHierarchy。
+     */
+    private function dispatchActiveMessages(activate:Bool, wasEnabled:Bool):Void {
+        var nowEnabled = activeInHierarchy;
+        if (activate ? (nowEnabled && !wasEnabled) : (wasEnabled && !nowEnabled))
+            dispatchComponents(activate ? "OnEnable" : "OnDisable");
+        if (transform == null)
+            return;
+        // PORT-NOTE: 取副本再遍历 —— OnEnable/OnDisable 处理器可能增删子级
+        // （与 UnityObject.destroyGameObject 的同一处理）。
+        for (child in transform.children.copy()) {
+            if (child == null || child.gameObject == null)
+                continue;
+            // active 翻转只发生在本子树的根上，其余节点的 active 标志未变，因此子节点
+            // 翻转前的 activeInHierarchy = 自身 active && 父节点翻转前的 activeInHierarchy。
+            child.gameObject.dispatchActiveMessages(activate, child.gameObject.active && wasEnabled);
+        }
+    }
+
+    /** 按 ModelPrefabLoader.callAwake 同款反射方式给本节点组件派发一条生命周期消息。 */
+    private function dispatchComponents(message:String):Void {
+        for (comp in components) {
+            if (comp == null)
+                continue;
+            var fn = Reflect.field(comp, message);
+            if (fn == null || !Reflect.isFunction(fn))
+                continue;
+            try {
+                Reflect.callMethod(comp, fn, []);
+            } catch (e:Dynamic) {
+                // PORT-NOTE: Unity 里单个组件的 OnEnable/OnDisable 抛异常只记日志并继续
+                // 派发其余组件，不会中断整棵树的遍历。
+                var label = comp.name != null && comp.name.length > 0 ? comp.name : Type.getClassName(Type.getClass(comp));
+                Debug.LogWarning('[GameObject] ${label} 的 ${message} 抛出异常：$e');
+            }
+        }
     }
 
     // PORT-NOTE: 泛型参数不加 `:Component` 约束，以便查询接口类型（如 IModelComponent）。
